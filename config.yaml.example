@@ -6,6 +6,7 @@ embedding:
 
 beancount:
   filename: main.bean
+  currency: CNY
 
 bot:
   telegram:

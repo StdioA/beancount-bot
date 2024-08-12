@@ -8,12 +8,14 @@ import txs_query
 import conf
 
 
+DEFAULT_BEAN = conf.config.beancount.filename
+CURRENCY = conf.config.beancount.currency
+
+
 transaction_tmpl = """
 {date} * "{payee}" "{desc}"{tags}
-  {from_account}\t\t\t{amount:.2f} CNY
+  {from_account}\t\t\t{amount:.2f} {currency}
   {to_account}"""
-
-DEFAULT_BEAN = conf.config.beancount.filename
 
 
 class BeanManager:
@@ -117,6 +119,7 @@ class BeanManager:
             "amount": -amount,
             "desc": "",
             "tags": "",
+            "currency": CURRENCY,
         }
 
         tags = []
