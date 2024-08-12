@@ -8,9 +8,8 @@ from mmpy_bot.driver import Driver
 from mmpy_bot import Message, WebHookEvent
 from fava.util.date import parse_date
 from beancount.core.inventory import Inventory
-from beancount.core.data import Transaction
-from bean import bean_manager
-import txs_query
+from bean_utils.bean import bean_manager
+from bean_utils import txs_query
 import conf
 
 
@@ -159,7 +158,7 @@ class BeanBotPlugin(Plugin):
             title = f"Cost on {start}"
         else:
             # 查询这段时间的账户支出
-            title = f"Transaction between {start} - {end}"
+            title = f" between {start} - {end}"
         query = (f'SELECT ROOT(account, {level}) as acc, cost(sum(position)) AS cost '
                  f'WHERE date>={start} AND date<{end} AND ROOT(account, 1)="Expenses" GROUP BY acc;')
 

@@ -15,11 +15,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.command == "telegram":
         conf.load_config(args.c)
-        from telegram_bot import run_bot
+        from bots.telegram_bot import run_bot
         run_bot()
     elif args.command == "mattermost":
         conf.load_config(args.c)
-        from mmbot import run_bot
+        from bots.mmbot import run_bot
         run_bot()
     else:
         parser.print_help()

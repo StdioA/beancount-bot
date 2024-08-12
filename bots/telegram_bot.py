@@ -7,11 +7,10 @@ from telegram.ext import (
     Application, filters,
     MessageHandler, CommandHandler, CallbackQueryHandler
 )
-from bean import bean_manager
 from beancount.core.inventory import Inventory
-from beancount.core.data import Transaction
 from fava.util.date import parse_date
-import txs_query
+from bean_utils.bean import bean_manager
+from bean_utils import txs_query
 import conf
 
 

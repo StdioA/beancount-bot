@@ -4,11 +4,7 @@ from beancount.loader import load_file
 from beancount.core.data import Transaction
 from beancount.core.compare import hash_entry
 import conf
-
-try:
-    from vec_db import build_db, query_by_embedding
-except ImportError:
-    from json_vec_db import build_db, query_by_embedding
+from vec_db import build_db, query_by_embedding
 
 
 def embedding(texts):
@@ -120,7 +116,7 @@ def build_db_from_file():
 
 if __name__ == "__main__":
     conf.load_config("config.yaml")
-    build_db_from_file()
+    # build_db_from_file()
 
     queries = [
         "羽毛球垫付",

@@ -4,7 +4,7 @@ from decimal import Decimal
 from beancount import loader
 from beancount.query import query
 from beancount.core.data import Open, Transaction
-import txs_query
+from .txs_query import query_txs
 import conf
 
 
@@ -82,7 +82,7 @@ class BeanManager:
 
     def match_new_args(self, args):
         # Query from vector db
-        matched_txs = txs_query.query_txs(" ".join(args[1:]))
+        matched_txs = query_txs(" ".join(args[1:]))
         if matched_txs:
             # Rebuild narrations
             sentence = parse_args(matched_txs["sentence"])
