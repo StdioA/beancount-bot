@@ -1,18 +1,18 @@
 embedding:
-  api_url: "https://api.siliconflow.cn/v1/embeddings"
+  api_url: "https://api.siliconflow.cn/v1/embeddings"  # OpenAI compatible API endpoint
   api_key: "{your_key_here}"
   model: "BAAI/bge-large-zh-v1.5"
   transaction_amount: 1000  # Only fetch the latest 1000 transactions when building vector DB
 
 beancount:
-  filename: main.bean
+  filename: main.bean   # The entrypoint for all transactions, and generated transaction will also append to this file
   currency: CNY
 
 bot:
   telegram:
-    token: "{your_token_here}"
-    chat_id: 12345678 # your chat id
-  mattermost:
+    token: "{your_bot_token_here}"
+    chat_id: 12345678                     # Your chat id
+  mattermost:                             # See https://mmpy-bot.readthedocs.io/en/latest/plugins.html
     server_url: "{mattermost_server_url}"
     server_port: 443
     bot_token: "{mattermost_bot_token}"
