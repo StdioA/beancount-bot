@@ -29,7 +29,7 @@ _Why is this document written in Chinese? Because the currently defined grammar 
 基本文法：`{金额} {流出账户} {流入账户} {payee} {narration}`，流出和流入账户支持部分匹配。  
 若当前数据中已存在相同 payee，则流入账户可省略；若匹配失败，则会尝试从向量数据库中匹配一条最接近的数据。
 
-![基本记账示例](example/basic_record.png)
+<img src="example/basic_record.png" alt="基本记账示例" width="500" height="350">
 
 ### 其他命令
 * `/build`: 构建向量数据库
