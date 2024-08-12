@@ -5,10 +5,12 @@ from beancount.core.data import Transaction
 from beancount.core.compare import hash_entry
 import conf
 
-try:
-    from vec_db import build_db, query_by_embedding
-except ImportError:
-    from json_vec_db import build_db, query_by_embedding
+# try:
+#     from vec_db import build_db, query_by_embedding
+# except ImportError:
+#     from json_vec_db import build_db, query_by_embedding
+
+from json_vec_db import build_db, query_by_embedding
 
 
 def embedding(texts):
@@ -28,13 +30,19 @@ def embedding(texts):
     return data["data"], data["usage"]["total_tokens"]
 
 
-def convert_to_natural_language(transaction) -> str:
-    def convert_account(account):
-        segments = account.split(":")
-        if len(segments) < 3:
-            return segments[-1]
-        return segments[2]
+def convert_account(account):
+    dist_range = conf.config.beancount.account_distinguation_range
+    segments = account.split(":")
+    if isinstance(dist_range, int):
+        segments = segments[dist_range:dist_range+1]
+    else:
+        segments = segments[dist_range[0]:dist_range[1]+1]
+    if not segments:
+        return account
+    return ":".join(segments)
 
+
+def convert_to_natural_language(transaction) -> str:
     # date = transaction.date.strftime('%Y-%m-%d')
     payee = transaction.payee or '""'
     description = transaction.narration or '""'

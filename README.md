@@ -20,7 +20,7 @@ _Why is this document written in Chinese? Because the currently defined grammar 
 如果要使用 Mattermost 作为前端，则安装 `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
 
 ## 使用
-从 `config.yaml.example` 复制一份 `config.yaml`，并按需更改其中的内容。  
+从 `config.yaml.example` 复制一份 `config.yaml`，并按需更改其中的内容（具体配置含义可参考配置文件的注释）。  
 然后运行 bot: `python main.py telegram -c config.yaml` 或 `python main.py mattermost -c config.yaml`
 
 后续操作都以 telegram 为例子，若使用 mattermost 作为前端，则在输入命令时需要去掉命令前的斜杠。
