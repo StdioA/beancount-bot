@@ -1,0 +1,22 @@
+embedding:
+  api_url: "https://api.siliconflow.cn/v1/embeddings"
+  api_key: "{your_key_here}"
+  model: "BAAI/bge-large-zh-v1.5"
+  transaction_amount: 1000  # Only fetch the latest 1000 transactions when building vector DB
+
+beancount:
+  filename: main.bean
+
+bot:
+  telegram:
+    token: "{your_token_here}"
+    chat_id: 12345678 # your chat id
+  mattermost:
+    server_url: "{mattermost_server_url}"
+    server_port: 443
+    bot_token: "{mattermost_bot_token}"
+    bot_team: "{bot_team}"
+    ssl_verify: false
+    webhook_host_port: 8308
+    webhook_host_url: "{webhook_host}"
+    owner_user: "{chat_owner}"
