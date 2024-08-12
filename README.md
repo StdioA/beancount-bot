@@ -14,7 +14,7 @@ _Why is this document written in Chinese? Because the currently defined grammar 
 ## 安装
 `pip install -r requirements.txt`
 
-若你的设备支持 [sqlite-vec](https://github.com/asg017/sqlite-vec)，则额外安装向量数据库组件 `pip install sqlite-vec`，否则 bot 会使用 json 来存储数据库，并使用 numpy 进行向量计算。
+若你的设备支持 [sqlite-vec](https://github.com/asg017/sqlite-vec)，则额外安装向量数据库组件 `pip install sqlite-vec==0.1.1`，否则 bot 会使用 json 来存储数据库，并使用 numpy 进行向量计算。
 
 如果要使用 Telegram 作为前端，则安装 `python-telegram-bot`: `pip install python-telegram-bot==21.4`;
 如果要使用 Mattermost 作为前端，则安装 `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
