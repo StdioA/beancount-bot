@@ -2,7 +2,7 @@ embedding:
   api_url: "https://api.siliconflow.cn/v1/embeddings"  # OpenAI compatible API endpoint
   api_key: "{your_key_here}"
   model: "BAAI/bge-large-zh-v1.5"
-  transaction_amount: 1000                # Only fetch the latest 1000 transactions when building vector DB
+  transaction_amount: 1000                # Only fetch the latest 1000 dinstinct transactions when building vector DB
 
 beancount:
   filename: main.bean                     # The entrypoint for all transactions, and generated transaction will also append to this file

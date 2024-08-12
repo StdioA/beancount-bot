@@ -170,9 +170,6 @@ class BeanBotPlugin(Plugin):
     @listen_to("build", direct_only=True, allowed_users=[OWNER_NAME])
     def build_db(self, message: Message):
         entries = bean_manager.entries
-        amount = conf.config.embedding.transaction_amount
-        # Build latest transactions
-        entries = [e for e in entries if isinstance(e, Transaction)][-amount:]
         tokens = txs_query.build_tx_db(entries)
         self.driver.reply_to(message, f"Token usage: {tokens}")
 

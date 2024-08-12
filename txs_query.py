@@ -5,12 +5,10 @@ from beancount.core.data import Transaction
 from beancount.core.compare import hash_entry
 import conf
 
-# try:
-#     from vec_db import build_db, query_by_embedding
-# except ImportError:
-#     from json_vec_db import build_db, query_by_embedding
-
-from json_vec_db import build_db, query_by_embedding
+try:
+    from vec_db import build_db, query_by_embedding
+except ImportError:
+    from json_vec_db import build_db, query_by_embedding
 
 
 def embedding(texts):
@@ -63,35 +61,40 @@ def read_lines(fname, start, end):
 
 
 def build_tx_db(transactions):
-    sentences = []
-    for entry in transactions:
+    filtered_transactions = []
+    amount = conf.config.embedding.transaction_amount
+    sentences = set()
+    # Build latest transactions
+    for entry in reversed(transactions):
         if not isinstance(entry, Transaction):
             continue
-
         try:
             sentence = convert_to_natural_language(entry)
-            if sentence is None:
+            if sentence is None or sentence in sentences:
                 continue
             fname = entry.meta['filename']
             start_lineno = entry.meta['lineno']
             end_lineno = max(p.meta['lineno'] for p in entry.postings)
-            sentences.append({
+            filtered_transactions.append({
                 "sentence": sentence,
                 "hash": hash_entry(entry),
                 "content": "\n".join(read_lines(fname, start_lineno, end_lineno)),
             })
+            sentences.add(sentence)
+            if len(sentences) >= amount:
+                break
         except Exception:
             raise
     # Build embedding by group
     total_usage = 0
-    for i in range(0, len(sentences), 32):
-        sentence = [s['sentence'] for s in sentences[i:i+32]]
+    for i in range(0, len(filtered_transactions), 32):
+        sentence = [s['sentence'] for s in filtered_transactions[i:i+32]]
         embed, usage = embedding(sentence)
-        for s, e in zip(sentences[i:i+32], embed):
+        for s, e in zip(filtered_transactions[i:i+32], embed):
             s["embedding"] = e["embedding"]
         total_usage += usage
 
-    build_db(sentences)
+    build_db(filtered_transactions)
     logging.info(f"Total token usage: {total_usage}")
     return total_usage
 
@@ -106,13 +109,22 @@ def build_db_from_file():
     file_path = "main.bean"
     entries, errors, options = load_file(file_path)
     transactions = [e for e in entries if isinstance(e, Transaction)][-1000:]
-    build_tx_db(transactions)
+    print("Tokens:", build_tx_db(transactions))
 
 
 if __name__ == "__main__":
     conf.load_config("config.yaml")
     build_db_from_file()
-    # res = query_txs("羽毛球垫付")
-    # del res["embedding"]
-    # from pprint import pprint
-    # pprint(res)
+
+    queries = [
+        "羽毛球垫付",
+        "自行车",
+        "自行车 美团",
+        "Wechat Bicycle",
+    ]
+    for query in queries:
+        res = query_txs(query)
+        if "embedding" in res:
+            del res["embedding"]
+        from pprint import pprint
+        pprint(res)

@@ -148,9 +148,6 @@ async def callback(update, context):
 @owner_required
 async def build_db(update, context):
     entries = bean_manager.entries
-    amount = conf.config.embedding.transaction_amount
-    # Build latest transactions
-    entries = [e for e in entries if isinstance(e, Transaction)][-amount:]
     tokens = txs_query.build_tx_db(entries)
     await update.message.reply_text(f"Token usage: {tokens}")
 
