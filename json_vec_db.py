@@ -1,5 +1,6 @@
 import json
-import numpy
+import numpy as np
+from numpy.linalg import norm
 
 
 DB_NAME = "tx_db.json"
@@ -16,13 +17,13 @@ def query_by_embedding(embedding):
             transactions = json.load(f)
     except FileExistsError:
         return
-    embed_query = numpy.array(embedding)
+    embed_query = np.array(embedding)
     # Calculate cosine similarity
     max_similarity = -3
     matched_txs = None
     for txs in transactions:
-        # Calculate cosine similarity
-        distance = numpy.dot(txs["embedding"], embed_query)
+        embed_tx = np.array(txs["embedding"])
+        distance = np.dot(embed_tx, embed_query) / (norm(embed_tx) * norm(embed_query))
         if distance > max_similarity:
             max_similarity = distance
             matched_txs = txs
