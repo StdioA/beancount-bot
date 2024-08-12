@@ -8,10 +8,6 @@ import txs_query
 import conf
 
 
-DEFAULT_BEAN = conf.config.beancount.filename
-CURRENCY = conf.config.beancount.currency
-
-
 transaction_tmpl = """
 {date} * "{payee}" "{desc}"{tags}
   {from_account}\t\t\t{amount:.2f} {currency}
@@ -19,8 +15,9 @@ transaction_tmpl = """
 
 
 class BeanManager:
-    def __init__(self, fname=DEFAULT_BEAN) -> None:
-        self.fname = fname
+    def __init__(self, fname=None) -> None:
+        self.fname = fname or conf.config.beancount.filename
+        self.currency = conf.config.beancount.currency
         self._load()
 
     def _load(self):
@@ -119,7 +116,7 @@ class BeanManager:
             "amount": -amount,
             "desc": "",
             "tags": "",
-            "currency": CURRENCY,
+            "currency": self.currency,
         }
 
         tags = []
@@ -146,9 +143,6 @@ class BeanManager:
         with open(fname, 'a') as f:
             f.write("\n" + data + "\n")
         os.system(f"bean-format -o {fname} {fname} &")
-
-
-bean_manager = BeanManager()
 
 
 def parse_args(line):
@@ -192,7 +186,14 @@ def parse_args(line):
 
 
 if __name__ == "__main__":
-    print(bean_manager.generate_trx("19 微信 餐饮 午饭 牛肉面"))
+    # Tricky initialize
+    conf.load_config("config.yaml")
+
+
+bean_manager = BeanManager()
+
+
+if __name__ == "__main__":
     print(bean_manager.generate_trx("12.8 微信 饮料 咖啡"))
     print(bean_manager.generate_trx('12.8 微信 饮料 咖啡 "拿铁 AA"'))
     print(bean_manager.generate_trx("12.8 南京银行 微信 转账"))

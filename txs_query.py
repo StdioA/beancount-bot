@@ -40,10 +40,16 @@ def convert_account(account):
     return ":".join(segments)
 
 
+def escape_quotes(s):
+    if not s:
+        return s
+    return s.replace('"', '\\"').replace("'", "\\'")
+
+
 def convert_to_natural_language(transaction) -> str:
     # date = transaction.date.strftime('%Y-%m-%d')
-    payee = transaction.payee or '""'
-    description = transaction.narration or '""'
+    payee = f'"{escape_quotes(transaction.payee)}"'
+    description = f'"{escape_quotes(transaction.narration)}"'
     accounts = " ".join([convert_account(posting.account) for posting in transaction.postings])
     return f"{payee} {description} {accounts}"
 
@@ -121,6 +127,7 @@ if __name__ == "__main__":
         "自行车",
         "自行车 美团",
         "Wechat Bicycle",
+        "Char char bistro",
     ]
     for query in queries:
         res = query_txs(query)
