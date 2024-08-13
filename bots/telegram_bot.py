@@ -116,12 +116,13 @@ async def trx_render(update, context):
         message = update.message
         if update.message is None:
             message = update.edited_message
-        trx = bean_manager.generate_trx(message.text)
+        trxs = bean_manager.generate_trx(message.text)
     except Exception as e:
         rendered = "{}: {}".format(e.__class__.__name__, str(e))
         await update.message.reply_text(rendered, reply_to_message_id=message.message_id)
     else:
-        await update.message.reply_text(trx, reply_to_message_id=message.message_id, reply_markup=reply_markup)
+        for tx in trxs:
+            await update.message.reply_text(tx, reply_to_message_id=message.message_id, reply_markup=reply_markup)
 
 
 @owner_required

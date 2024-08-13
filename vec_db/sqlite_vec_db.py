@@ -1,8 +1,10 @@
 import logging
+from operator import itemgetter
 import sqlite3
 import sqlite_vec
 from typing import List
 import struct
+from vec_db.match import calculate_score
 
 
 def serialize_f32(vector: List[float]) -> bytes:
@@ -20,39 +22,41 @@ def build_db(txs):
     embedding_dimention = 1
     if txs:
         embedding_dimention = len(txs[0]["embedding"])
+
+    # Drop table
+    db.execute("DROP TABLE vec_items")
+    db.execute("DROP TABLE transactions")
+    db.commit()
+    db.execute("VACUUM")
+    db.commit()
     # Create tables
     db.execute(f"CREATE VIRTUAL TABLE IF NOT EXISTS vec_items USING vec0(embedding float[{embedding_dimention}])")
     db.execute("""
                CREATE TABLE IF NOT EXISTS transactions (
                id integer primary key,
                hash varchar(64) unique,
+               occurance integer,
                sentence text,
                content text)""")
-    # truncate tables
-    db.execute("DELETE FROM vec_items")
-    db.execute("DELETE FROM transactions")
-    db.commit()
-    db.execute("VACUUM")
-    db.commit()
 
     for id, tx in enumerate(txs, 1):
         db.execute("INSERT INTO vec_items (rowid, embedding) VALUES (?, ?)",
                    (id, serialize_f32(tx["embedding"])))
-        db.execute("INSERT INTO transactions (id, hash, sentence, content) VALUES (?, ?, ?, ?)",
-                   (id, tx["hash"], tx["sentence"], tx["content"]))
+        db.execute("INSERT INTO transactions (id, hash, occurance, sentence, content) VALUES (?, ?, ?, ?, ?)",
+                   (id, tx["hash"], tx["occurance"], tx["sentence"], tx["content"]))
     # flush db
     db.commit()
 
 
-def query_by_embedding(embedding):
+def query_by_embedding(embedding, sentence, candidate_amount):
     try:
         rows = db.execute(
-            """
+            f"""
             SELECT
             rowid,
             vec_distance_cosine(embedding, ?) AS distance
             FROM vec_items
-            ORDER BY distance LIMIT 1
+            ORDER BY distance LIMIT {candidate_amount}
             """,
             (serialize_f32(embedding),)).fetchall()
     except sqlite3.OperationalError as e:
@@ -60,14 +64,25 @@ def query_by_embedding(embedding):
         if "no such table" in e.args[0]:
             logging.warn("Sqlite vector database is not built")
             return []
+        raise
     if not rows:
         return []
 
     ids = [x[0] for x in rows]
     # Select from transactions table
     placeholder = ",".join(["?"] * len(ids))
-    txs_rows = db.execute(f"SELECT id, sentence, content FROM transactions WHERE id in ({placeholder})", ids).fetchall()
+    row_names = ["id", "occurance", "sentence", "content"]
+    rows_str = ", ".join(row_names)
+    txs_rows = db.execute(f"SELECT {rows_str} FROM transactions WHERE id in ({placeholder})", ids).fetchall()
     txs_rows.sort(key=lambda x: ids.index(x[0]))
-    row_names = ["id", "sentence", "content"]
-    txs_rows = [dict(zip(row_names, tx)) for tx in txs_rows]
-    return txs_rows
+    # Merge result & distance
+    candidates = []
+    for drow, tx in zip(rows, txs_rows):
+        tx_row = dict(zip(row_names, tx))
+        tx_row["distance"] = drow[1]
+        tx_row["score"] = calculate_score(tx_row, sentence)
+        candidates.append(tx_row)
+
+    candidates.sort(key=itemgetter("score"), reverse=True)
+    # print(candidates)
+    return candidates

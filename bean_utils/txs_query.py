@@ -63,48 +63,55 @@ def read_lines(fname, start, end):
 
 
 def build_tx_db(transactions):
-    filtered_transactions = []
+    unique_txs = {}
     amount = conf.config.embedding.transaction_amount
-    sentences = set()
     # Build latest transactions
     for entry in reversed(transactions):
         if not isinstance(entry, Transaction):
             continue
         try:
             sentence = convert_to_natural_language(entry)
-            if sentence is None or sentence in sentences:
+            if sentence is None:
+                continue
+            if sentence in unique_txs:
+                unique_txs[sentence]["occurance"] += 1
                 continue
             fname = entry.meta['filename']
             start_lineno = entry.meta['lineno']
             end_lineno = max(p.meta['lineno'] for p in entry.postings)
-            filtered_transactions.append({
+            unique_txs[sentence] = {
                 "sentence": sentence,
                 "hash": hash_entry(entry),
+                "occurance": 1,
                 "content": "\n".join(read_lines(fname, start_lineno, end_lineno)),
-            })
-            sentences.add(sentence)
-            if len(sentences) >= amount:
+            }
+            if len(unique_txs) >= amount:
                 break
         except Exception:
             raise
     # Build embedding by group
     total_usage = 0
-    for i in range(0, len(filtered_transactions), 32):
-        sentence = [s['sentence'] for s in filtered_transactions[i:i+32]]
+    unique_txs_list = list(unique_txs.values())
+
+    for i in range(0, len(unique_txs_list), 32):
+        sentence = [s['sentence'] for s in unique_txs_list[i:i+32]]
         embed, usage = embedding(sentence)
-        for s, e in zip(filtered_transactions[i:i+32], embed):
+        for s, e in zip(unique_txs_list[i:i+32], embed):
             s["embedding"] = e["embedding"]
         total_usage += usage
 
-    build_db(filtered_transactions)
+    build_db(unique_txs_list)
     logging.info(f"Total token usage: {total_usage}")
     return total_usage
 
 
 def query_txs(query):
-    match = query_by_embedding(embedding([query])[0][0]["embedding"])
+    candidates = conf.config.embedding.candidates or 3
+    output_amount = conf.config.embedding.output_amount or 1
+    match = query_by_embedding(embedding([query])[0][0]["embedding"], query, candidates)
     if match:
-        return match[0]
+        return match[:output_amount]
+    return []
 
 
 def build_db_from_file():
@@ -112,22 +119,3 @@ def build_db_from_file():
     entries, errors, options = load_file(file_path)
     transactions = [e for e in entries if isinstance(e, Transaction)][-1000:]
     print("Tokens:", build_tx_db(transactions))
-
-
-if __name__ == "__main__":
-    conf.load_config("config.yaml")
-    # build_db_from_file()
-
-    queries = [
-        "羽毛球垫付",
-        "自行车",
-        "自行车 美团",
-        "Wechat Bicycle",
-        "Char char bistro",
-    ]
-    for query in queries:
-        res = query_txs(query)
-        if "embedding" in res:
-            del res["embedding"]
-        from pprint import pprint
-        pprint(res)

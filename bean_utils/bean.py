@@ -4,6 +4,7 @@ from decimal import Decimal
 from beancount import loader
 from beancount.query import query
 from beancount.core.data import Open, Transaction
+from typing import List
 from .txs_query import query_txs
 import conf
 
@@ -80,15 +81,16 @@ class BeanManager:
     def run_query(self, q):
         return query.run_query(self.entries, self.options, q)
 
-    def match_new_args(self, args):
+    def match_new_args(self, args) -> List[List[str]]:
         # Query from vector db
         matched_txs = query_txs(" ".join(args[1:]))
-        if matched_txs:
+        candidate_args = []
+        for tx in matched_txs:
             # Rebuild narrations
-            sentence = parse_args(matched_txs["sentence"])
+            sentence = parse_args(tx["sentence"])
             new_args = [args[0]] + sentence[2:4] + sentence[:2]
-            args = new_args
-        return args
+            candidate_args.append(new_args)
+        return candidate_args
 
     def build_txs(self, args):
         amount, from_acc, to_acc, *extra = args
@@ -130,13 +132,19 @@ class BeanManager:
 
         return transaction_tmpl.format(**kwargs)
 
-    def generate_trx(self, line) -> str:
+    def generate_trx(self, line) -> List[str]:
         args = parse_args(line)
         try:
-            return self.build_txs(args)
+            return [self.build_txs(args)]
         except ValueError:
-            args = self.match_new_args(args)
-            return self.build_txs(args)
+            candidate_args = self.match_new_args(args)
+            candidate_txs = []
+            for args in candidate_args:
+                try:
+                    candidate_txs.append(self.build_txs(args))
+                except ValueError:
+                    pass
+            return candidate_txs
 
     def commit_trx(self, data):
         fname = self.fname

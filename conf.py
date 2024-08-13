@@ -32,13 +32,17 @@ class Config:
         with open(config_path, 'r') as file:
             self._config = ImmutableDict(yaml.safe_load(file))
 
+    def __bool__(self):
+        return bool(self._config)
+
     def __getattr__(self, key):
         if key in self._config:
             value = self._config[key]
             if isinstance(value, dict):
                 return Config.from_dict(value)
             return value
-        raise AttributeError(f"Config has no attribute '{key}'")
+        # raise AttributeError(f"Config has no attribute '{key}'")
+        return Config.from_dict({})
 
     @classmethod
     def from_dict(cls, dictionary):

@@ -63,7 +63,7 @@ class BeanBotPlugin(Plugin):
     @listen_to(r"^-?[\d.]+ ", direct_only=True, allowed_users=[OWNER_NAME])
     async def render(self, message: Message):
         try:
-            trx = bean_manager.generate_trx(message.text)
+            trxs = bean_manager.generate_trx(message.text)
         except Exception as e:
             rendered = "{}: {}".format(e.__class__.__name__, str(e))
             self.driver.reply_to(message, "", props={
@@ -75,16 +75,17 @@ class BeanBotPlugin(Plugin):
                 ]
             })
             return
-        self.driver.reply_to(message, f"`{trx}`", props={
-            "attachments": [
-                {
-                    "actions": [
-                        self.gen_action("submit", "提交", trx),
-                        self.gen_action("cancel", "取消", trx),
-                    ]
-                }
-            ]
-        })
+        for tx in trxs:
+            self.driver.reply_to(message, f"`{tx}`", props={
+                "attachments": [
+                    {
+                        "actions": [
+                            self.gen_action("submit", "提交", tx),
+                            self.gen_action("cancel", "取消", tx),
+                        ]
+                    }
+                ]
+            })
 
     @listen_webhook("^(submit|cancel)$")
     async def submit_listener(self, event: WebHookEvent):

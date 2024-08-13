@@ -44,10 +44,13 @@ _Why is this document written in Chinese? Because the currently defined grammar 
     * 参数默认设置同上
 
 ## Roadmap
-- [ ] 使用向量数据库匹配时，支持输出多条备选
+- [x] 使用向量数据库匹配时，支持输出多条备选（以弥补准确率的缺陷）
+- [ ] 再记一笔
+- [ ] 撤回交易
+- [ ] 基于 Web 的 Chat UI
 - [ ] 通过 LLM 进行更精确的元素替换（比如自动将“午饭”改成“晚饭”，或自动更改变更账户等）
 - [ ] 支持增量构建向量数据库（如果用 OpenAI 的 embedding，目前构建 1000 条交易组成的数据库大概只需要 ￥0.01，而且目前提供 embedding 的供应商大多不对 embedding 功能收费，所以优先级不高）
-- [ ] 基于 Web 的 Chat UI
+
 
 ## Reference
 [开始使用 Beancount - Telegram bot](https://blog.stdioa.com/2020/09/using-beancount/#telegram-bot)
