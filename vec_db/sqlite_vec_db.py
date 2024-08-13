@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 import sqlite_vec
 from typing import List
@@ -44,15 +45,21 @@ def build_db(txs):
 
 
 def query_by_embedding(embedding):
-    rows = db.execute(
-        """
-        SELECT
-          rowid,
-          vec_distance_cosine(embedding, ?) AS distance
-        FROM vec_items
-        ORDER BY distance LIMIT 3
-        """,
-        (serialize_f32(embedding),)).fetchall()
+    try:
+        rows = db.execute(
+            """
+            SELECT
+            rowid,
+            vec_distance_cosine(embedding, ?) AS distance
+            FROM vec_items
+            ORDER BY distance LIMIT 1
+            """,
+            (serialize_f32(embedding),)).fetchall()
+    except sqlite3.OperationalError as e:
+        # Handle exception when vec_db is not built
+        if "no such table" in e.args[0]:
+            logging.warn("Sqlite vector database is not built")
+            return []
     if not rows:
         return []
 

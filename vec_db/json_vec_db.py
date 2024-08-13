@@ -1,4 +1,5 @@
 import json
+import logging
 import numpy as np
 from numpy.linalg import norm
 
@@ -16,6 +17,7 @@ def query_by_embedding(embedding):
         with open("tx_db.json") as f:
             transactions = json.load(f)
     except FileExistsError:
+        logging.warn("JSON vector database is not built")
         return
     embed_query = np.array(embedding)
     # Calculate cosine similarity
