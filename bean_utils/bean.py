@@ -1,7 +1,9 @@
 import os
+import re
 from datetime import date
 from decimal import Decimal
 from beancount import loader
+from beancount.parser import parser
 from beancount.query import query
 from beancount.core.data import Open, Transaction
 from typing import List
@@ -9,10 +11,14 @@ from .txs_query import query_txs
 import conf
 
 
+NoTransactionError = ValueError("No transaction found")
 transaction_tmpl = """
 {date} * "{payee}" "{desc}"{tags}
   {from_account}\t\t\t{amount:.2f} {currency}
   {to_account}"""
+
+
+TXS_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}(.*)")
 
 
 class BeanManager:
@@ -145,6 +151,21 @@ class BeanManager:
                 except ValueError:
                     pass
             return candidate_txs
+
+    def clone_trx(self, text) -> str:
+        entries, _, _ = parser.parse_string(text)
+        try:
+            txs = next(e for e in entries if isinstance(e, Transaction))
+        except StopIteration:
+            raise NoTransactionError
+
+        # Parse transaction from given string
+        lines = [txs.meta["lineno"]] + [p.meta["lineno"] for p in txs.postings]
+        segments = text.split("\n")[min(lines)-1:max(lines)]
+        # Modify date
+        today = str(date.today())
+        segments[0] = TXS_DATE_RE.sub(rf"{today}\1", segments[0])
+        return "\n".join(segments)
 
     def commit_trx(self, data):
         fname = self.fname

@@ -23,7 +23,16 @@ _Why is this document written in Chinese? Because the currently defined grammar 
 从 `config.yaml.example` 复制一份 `config.yaml`，并按需更改其中的内容（具体配置含义可参考配置文件的注释）。  
 然后运行 bot: `python main.py telegram -c config.yaml` 或 `python main.py mattermost -c config.yaml`
 
-后续操作都以 telegram 为例子，若使用 mattermost 作为前端，则使用时的不同会单独注明。
+若使用 Telegram，可以预先在 [BotFather](https://telegram.me/BotFather) 处配置 bot 命令列表：
+
+```
+start - ping
+bill - 查询账户变动
+expense - 查询支出
+clone - 复制交易
+```
+
+后续操作都以 Telegram 为前端举例，若使用 Mattermost 作为前端，则使用时的不同会单独注明。
 
 ### 基本记账
 基本文法：`{金额} {流出账户} {流入账户} {payee} {narration}`，流出和流入账户支持部分匹配。  
@@ -42,10 +51,12 @@ _Why is this document written in Chinese? Because the currently defined grammar 
 * `/bill {range} {level}`：统计某时间段内的账户变更，支持按账户层级组合
     * Mattermost 为 `bill [-l {level}] [{range}]`
     * 参数默认设置同上
+* `/clone`：在已有的交易信息上回复该命令，则可以生成一条新交易，交易日期为当日
+    * 由于 Mattermost 对消息引用的支持不够好完善，因此暂时不支持复制，后续可以考虑通过 reaction 等方式达成
 
 ## Roadmap
 - [x] 使用向量数据库匹配时，支持输出多条备选（以弥补准确率的缺陷）
-- [ ] 再记一笔
+- [x] 再记一笔
 - [ ] 撤回交易
 - [ ] 基于 Web 的 Chat UI
 - [ ] 通过 LLM 进行更精确的元素替换（比如自动将“午饭”改成“晚饭”，或自动更改变更账户等）

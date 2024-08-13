@@ -1,7 +1,8 @@
 # coding: utf-8
+import time
 import telegram
 import logging
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from telegram import Update
 from telegram.ext import (
     Application, filters,
@@ -9,7 +10,7 @@ from telegram.ext import (
 )
 from beancount.core.inventory import Inventory
 from fava.util.date import parse_date
-from bean_utils.bean import bean_manager
+from bean_utils.bean import bean_manager, NoTransactionError
 from bean_utils import txs_query
 import conf
 
@@ -18,7 +19,9 @@ OWNER_ID = conf.config.bot.telegram.chat_id
 
 
 async def start(update, context):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="哦")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    uptime = timedelta(seconds=time.monotonic())
+    await update.message.reply_text(text=f"Now: {now}\nUptime: {uptime}")
 
 
 def owner_required(func):
@@ -104,14 +107,15 @@ async def expense(update, context):
     await update.message.reply_text(str(result))
 
 
+_button_list = [
+    telegram.InlineKeyboardButton("提交", callback_data="提交"),
+    telegram.InlineKeyboardButton("取消", callback_data="取消"),
+]
+_pending_txs_reply_markup = telegram.InlineKeyboardMarkup([_button_list])
+
+
 @owner_required
 async def trx_render(update, context):
-    button_list = [
-        telegram.InlineKeyboardButton("提交", callback_data="提交"),
-        telegram.InlineKeyboardButton("取消", callback_data="取消"),
-    ]
-    reply_markup = telegram.InlineKeyboardMarkup([button_list])
-
     try:
         message = update.message
         if update.message is None:
@@ -122,7 +126,8 @@ async def trx_render(update, context):
         await update.message.reply_text(rendered, reply_to_message_id=message.message_id)
     else:
         for tx in trxs:
-            await update.message.reply_text(tx, reply_to_message_id=message.message_id, reply_markup=reply_markup)
+            await update.message.reply_text(tx, reply_to_message_id=message.message_id,
+                                            reply_markup=_pending_txs_reply_markup)
 
 
 @owner_required
@@ -152,6 +157,28 @@ async def build_db(update, context):
     await update.message.reply_text(f"Token usage: {tokens}")
 
 
+@owner_required
+async def clone_txs(update, context):
+    # Fetch ref message
+    message = update.message.reply_to_message
+    if message is None:
+        await update.message.reply_text("Please specify the transaction", reply_to_message_id=message.message_id)
+        return
+    # Fetch original message
+    refer_txs = message.text
+    try:
+        cloned_txs = bean_manager.clone_trx(refer_txs)
+    except Exception as e:
+        if e == NoTransactionError:
+            err_msg = e.args[0]
+        else:
+            err_msg = "{}: {}".format(e.__class__.__name__, str(e))
+        await update.message.reply_text(err_msg, reply_to_message_id=message.message_id)
+
+    await update.message.reply_text(cloned_txs, reply_to_message_id=message.message_id,
+                                    reply_markup=_pending_txs_reply_markup)
+
+
 def run_bot():
     application = Application.builder().token(conf.config.bot.telegram.token).build()
 
@@ -160,6 +187,7 @@ def run_bot():
         CommandHandler('bill', bill, has_args=True),
         CommandHandler('expense', expense, has_args=True),
         CommandHandler('build', build_db, has_args=False),
+        CommandHandler('clone', clone_txs, filters=filters.REPLY, has_args=False),
         MessageHandler(filters.TEXT & (~filters.COMMAND), trx_render),
         CallbackQueryHandler(callback),
     ]
