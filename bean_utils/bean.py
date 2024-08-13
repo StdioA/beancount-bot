@@ -94,7 +94,10 @@ class BeanManager:
         for tx in matched_txs:
             # Rebuild narrations
             sentence = parse_args(tx["sentence"])
-            new_args = [args[0]] + sentence[2:4] + sentence[:2]
+            # The tx may contains more than one accounts, so we need to distinguish them by prefix
+            tags = [seg for seg in sentence[4:] if seg.startswith("#")]
+            #           price     both accounts  payee & narration  tags
+            new_args = [args[0]] + sentence[2:4] + sentence[:2] + tags
             candidate_args.append(new_args)
         return candidate_args
 

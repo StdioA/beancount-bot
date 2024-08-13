@@ -47,7 +47,11 @@ def convert_to_natural_language(transaction) -> str:
     payee = f'"{escape_quotes(transaction.payee)}"'
     description = f'"{escape_quotes(transaction.narration)}"'
     accounts = " ".join([convert_account(posting.account) for posting in transaction.postings])
-    return f"{payee} {description} {accounts}"
+    sentence = f"{payee} {description} {accounts}"
+    if transaction.tags:
+        tags = " ".join(["#" + tag for tag in transaction.tags])
+        sentence += f" {tags}"
+    return sentence
 
 
 content_cache = {}
