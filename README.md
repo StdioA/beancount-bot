@@ -30,6 +30,7 @@ start - ping
 bill - 查询账户变动
 expense - 查询支出
 clone - 复制交易
+build - 重建向量数据库
 ```
 
 后续操作都以 Telegram 为前端举例，若使用 Mattermost 作为前端，则使用时的不同会单独注明。
