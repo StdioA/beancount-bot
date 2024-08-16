@@ -5,7 +5,7 @@ import conf
 
 
 # flake8: noqa
-_PROMPT_TEMPLATE = """The user is using Beancount for bookkeeping. For simplicity, there is currently a set of accounting grammar that is converted by a program into complete transaction records. The format of the grammar is `<price> <outflow_account> [<inflow_account>] <payee> [<description>]`, where the inflow and outflow accounts are subject to fuzzy matching.
+_PROMPT_TEMPLATE = """The user is using Beancount for bookkeeping. For simplicity, there is currently a set of accounting grammar that is converted by a program into complete transaction records. The format of the grammar is `<price> <outflow_account> [<inflow_account>] <payee> [<description>] [#<tag1> [#<tag2>] ...]`, where the inflow and outflow accounts are subject to fuzzy matching.
 
 For example：`5 微信 餐饮 麦当劳 午饭` will be converted to:
 ```

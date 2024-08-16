@@ -5,9 +5,10 @@
 * 支持基本账目记录
     * 支持基本文法匹配：`{金额} {流出账户} {流入账户} {payee} {narration} [{#tag1} {#tag2}]`
     * 若当前数据中已存在相同 payee，则流入账户可省略
-    * 匹配失败后，可以尝试从向量数据库中进行匹配
+    * 匹配失败后，可以尝试从向量数据库中进行记录匹配，或通过 RAG 进行信息补全
 * 区间内支出统计：`/expense 2024-08`
 * 区间内账户变更统计：`/bill 2024-08`
+* 提交新记录后，会自动重载账目缓存
 
 _Why is this document written in Chinese? Because the currently defined grammar rules are not as friendly to languages that contain spaces (such as English and French), as you should quote manually on payee and narration._
 
