@@ -35,6 +35,9 @@ class Config:
     def __bool__(self):
         return bool(self._config)
 
+    def get(self, key, default):
+        return self._config.get(key, default)
+
     def __getattr__(self, key):
         if key in self._config:
             value = self._config[key]

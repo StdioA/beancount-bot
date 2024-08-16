@@ -145,15 +145,21 @@ class BeanManager:
         args = parse_args(line)
         try:
             return [self.build_txs(args)]
-        except ValueError:
-            candidate_args = self.match_new_args(args)
+        except ValueError as e:
+            if not conf.config.embedding.get("enable", True):
+                raise e
+            # Query from vector db
             candidate_txs = []
-            for args in candidate_args:
+            for args in self.match_new_args(args):
                 try:
                     candidate_txs.append(self.build_txs(args))
                 except ValueError:
                     pass
-            return candidate_txs
+            if candidate_txs:
+                return candidate_txs
+            # If no match, raise original error,
+            # however it may not be happen if vecdb is built.
+            raise e
 
     def clone_trx(self, text) -> str:
         entries, _, _ = parser.parse_string(text)

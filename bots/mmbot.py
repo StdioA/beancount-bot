@@ -169,6 +169,9 @@ class BeanBotPlugin(Plugin):
 
     @listen_to("build", direct_only=True, allowed_users=[OWNER_NAME])
     def build_db(self, message: Message):
+        if not conf.config.embedding.get("enable", True):
+            self.driver.reply_to(message, "Embedding is not enabled.")
+            return
         entries = bean_manager.entries
         tokens = txs_query.build_tx_db(entries)
         self.driver.reply_to(message, f"Token usage: {tokens}")

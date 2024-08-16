@@ -1,4 +1,5 @@
 embedding:
+  enable: true                            # Disable it if you care about privacy
   api_url: "https://api.siliconflow.cn/v1/embeddings"  # OpenAI compatible API endpoint
   api_key: "{your_key_here}"
   model: "BAAI/bge-large-zh-v1.5"

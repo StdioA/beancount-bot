@@ -115,7 +115,7 @@ _pending_txs_reply_markup = telegram.InlineKeyboardMarkup([_button_list])
 
 
 @owner_required
-async def trx_render(update, context):
+async def render(update, context):
     try:
         message = update.message
         if update.message is None:
@@ -152,6 +152,9 @@ async def callback(update, context):
 
 @owner_required
 async def build_db(update, context):
+    if not conf.config.embedding.get("enable", True):
+        await update.message.reply_text("Embedding is not enabled.")
+        return
     entries = bean_manager.entries
     tokens = txs_query.build_tx_db(entries)
     await update.message.reply_text(f"Token usage: {tokens}")
@@ -188,7 +191,7 @@ def run_bot():
         CommandHandler('expense', expense, has_args=True),
         CommandHandler('build', build_db, has_args=False),
         CommandHandler('clone', clone_txs, filters=filters.REPLY, has_args=False),
-        MessageHandler(filters.TEXT & (~filters.COMMAND), trx_render),
+        MessageHandler(filters.TEXT & (~filters.COMMAND), render),
         CallbackQueryHandler(callback),
     ]
     for handler in handlers:
