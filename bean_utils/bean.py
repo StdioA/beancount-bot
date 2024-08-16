@@ -153,7 +153,7 @@ class BeanManager:
                 today = str(date.today())
                 accounts = map(bean_manager.find_account, args[1:])
                 accounts = list(filter(bool, accounts))
-                completion = complete_rag(line, today, accounts)
+                completion = complete_rag(args, today, accounts)
                 return [self.clone_trx(completion)]
             elif vec_enabled:
                 # Query from vector db

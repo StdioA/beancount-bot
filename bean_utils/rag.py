@@ -7,12 +7,11 @@ import conf
 # flake8: noqa
 _PROMPT_TEMPLATE = """The user is using Beancount for bookkeeping. For simplicity, there is currently a set of accounting grammar that is converted by a program into complete transaction records. The format of the grammar is `<price> <outflow_account> [<inflow_account>] <payee> [<description>] [#<tag1> [#<tag2>] ...]`, where the inflow and outflow accounts are subject to fuzzy matching.
 
-For example：`5 微信 餐饮 麦当劳 午饭` will be converted to:
-```
-2024-08-16 * "麦当劳" "午饭"
+For example：`5 微信 餐饮 麦当劳 午饭 #tag1 #another` will be converted to the following record:
+
+2024-08-16 * "麦当劳" "午饭" #tag1 #another
   Assets:Checking:微信支付:Deposit            -5.00 CNY
   Expenses:Daily:餐饮
-```
 
 However, user input is not accurate enough and may be missing some information, maybe it's payee or description, or one or all of accounts.  
 I will provide you with several reference sets, hoping that you can combine the reference information with the user's input to piece together a complete accounting record.  
@@ -31,13 +30,14 @@ Reference records are separated by dash delimiter:
 """
 
 
-def complete_rag(user_input, date, accounts):
-    stripped_input = " ".join(user_input.split()[1:])
+def complete_rag(args, date, accounts):
+    # Remove the numeric value at first
+    stripped_input = " ".join(args[1:])
 
     candidates = conf.config.embedding.candidates or 3
     rag_config = conf.config.rag
 
-    match = query_by_embedding(embedding([stripped_input])[0][0]["embedding"], user_input, candidates)
+    match = query_by_embedding(embedding([stripped_input])[0][0]["embedding"], stripped_input, candidates)
     reference_records = "\n------\n".join([x["content"] for x in match])
     prompt = _PROMPT_TEMPLATE.format(date=date, reference_records=reference_records, accounts=accounts)
     payload = {
@@ -49,7 +49,7 @@ def complete_rag(user_input, date, accounts):
             },
             {
                 "role": "user",
-                "content": user_input,
+                "content": " ".join(args),
             }
         ],
     }
