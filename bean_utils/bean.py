@@ -7,7 +7,8 @@ from beancount.parser import parser
 from beancount.query import query
 from beancount.core.data import Open, Transaction
 from typing import List
-from .txs_query import query_txs
+from bean_utils.txs_query import query_txs
+from bean_utils.rag import complete_rag
 import conf
 
 
@@ -146,20 +147,29 @@ class BeanManager:
         try:
             return [self.build_txs(args)]
         except ValueError as e:
-            if not conf.config.embedding.get("enable", True):
+            vec_enabled = conf.config.embedding.get("enable", True)
+            rag_enabled = conf.config.rag.get("enable", False)
+            if rag_enabled:
+                today = str(date.today())
+                accounts = map(bean_manager.find_account, args[1:])
+                accounts = list(filter(bool, accounts))
+                completion = complete_rag(line, today, accounts)
+                return [self.clone_trx(completion)]
+            elif vec_enabled:
+                # Query from vector db
+                candidate_txs = []
+                for args in self.match_new_args(args):
+                    try:
+                        candidate_txs.append(self.build_txs(args))
+                    except ValueError:
+                        pass
+                if candidate_txs:
+                    return candidate_txs
+                # If no match, raise original error,
+                # however it may not be happen if vecdb is built.
                 raise e
-            # Query from vector db
-            candidate_txs = []
-            for args in self.match_new_args(args):
-                try:
-                    candidate_txs.append(self.build_txs(args))
-                except ValueError:
-                    pass
-            if candidate_txs:
-                return candidate_txs
-            # If no match, raise original error,
-            # however it may not be happen if vecdb is built.
-            raise e
+            else:
+                raise e
 
     def clone_trx(self, text) -> str:
         entries, _, _ = parser.parse_string(text)

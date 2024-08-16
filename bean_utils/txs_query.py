@@ -87,7 +87,7 @@ def build_tx_db(transactions):
                 "sentence": sentence,
                 "hash": hash_entry(entry),
                 "occurance": 1,
-                "content": "\n".join(read_lines(fname, start_lineno, end_lineno)),
+                "content": "".join(read_lines(fname, start_lineno, end_lineno)),
             }
             if len(unique_txs) >= amount:
                 break
