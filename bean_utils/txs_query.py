@@ -122,4 +122,4 @@ def build_db_from_file():
     file_path = "main.bean"
     entries, errors, options = load_file(file_path)
     transactions = [e for e in entries if isinstance(e, Transaction)][-1000:]
-    print("Tokens:", build_tx_db(transactions))
+    logging.debug("Tokens:", build_tx_db(transactions))

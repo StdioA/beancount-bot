@@ -50,7 +50,7 @@ class Config:
     @classmethod
     def from_dict(cls, dictionary):
         config = cls.__new__(cls)
-        config._config = ImmutableDict(dictionary)
+        config._config = ImmutableDict(dictionary)  # noqa: SLF001
         return config
 
 

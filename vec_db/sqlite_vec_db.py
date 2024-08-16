@@ -39,11 +39,11 @@ def build_db(txs):
                sentence text,
                content text)""")
 
-    for id, tx in enumerate(txs, 1):
+    for id_, tx in enumerate(txs, 1):
         db.execute("INSERT INTO vec_items (rowid, embedding) VALUES (?, ?)",
-                   (id, serialize_f32(tx["embedding"])))
+                   (id_, serialize_f32(tx["embedding"])))
         db.execute("INSERT INTO transactions (id, hash, occurance, sentence, content) VALUES (?, ?, ?, ?, ?)",
-                   (id, tx["hash"], tx["occurance"], tx["sentence"], tx["content"]))
+                   (id_, tx["hash"], tx["occurance"], tx["sentence"], tx["content"]))
     # flush db
     db.commit()
 
@@ -62,7 +62,7 @@ def query_by_embedding(embedding, sentence, candidate_amount):
     except sqlite3.OperationalError as e:
         # Handle exception when vec_db is not built
         if "no such table" in e.args[0]:
-            logging.warn("Sqlite vector database is not built")
+            logging.warning("Sqlite vector database is not built")
             return []
         raise
     if not rows:

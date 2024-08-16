@@ -1,6 +1,5 @@
 import click
-import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from mmpy_bot import Bot, Settings
 from mmpy_bot import Plugin, listen_to, listen_webhook
 from mmpy_bot.plugins.base import PluginManager
@@ -9,7 +8,7 @@ from mmpy_bot import Message, WebHookEvent
 from fava.util.date import parse_date
 from beancount.core.inventory import Inventory
 from bean_utils.bean import bean_manager
-from bean_utils import txs_query
+from bots import controller
 import conf
 
 
@@ -47,12 +46,12 @@ class BeanBotPlugin(Plugin):
     def gen_hook(self, action):
         return f"{self.webhook_host_url}:{self.webhook_host_port}/hooks/{action}"
 
-    def gen_action(self, id, name, trx):
+    def gen_action(self, id_, name, trx):
         return {
-            "id": id,
+            "id": id_,
             "name": name,
             "integration": {
-                "url": self.gen_hook(id),
+                "url": self.gen_hook(id_),
                 "context": {
                     "trx": trx,
                     "choice": name,
@@ -62,26 +61,25 @@ class BeanBotPlugin(Plugin):
 
     @listen_to(r"^-?[\d.]+ ", direct_only=True, allowed_users=[OWNER_NAME])
     async def render(self, message: Message):
-        try:
-            trxs = bean_manager.generate_trx(message.text)
-        except Exception as e:
-            rendered = "{}: {}".format(e.__class__.__name__, str(e))
+        resp = controller.render_txs(message.text)
+        if isinstance(resp, controller.ErrorMessage):
             self.driver.reply_to(message, "", props={
                 "attachments": [
                     {
-                        "text": rendered,
+                        "text": resp.content,
                         "color": "#ffc107"
                     }
                 ]
             })
             return
-        for tx in trxs:
-            self.driver.reply_to(message, f"`{tx}`", props={
+        for tx in resp:
+            tx_content = tx.content
+            self.driver.reply_to(message, f"`{tx_content}`", props={
                 "attachments": [
                     {
                         "actions": [
-                            self.gen_action("submit", "提交", tx),
-                            self.gen_action("cancel", "取消", tx),
+                            self.gen_action("submit", "提交", tx_content),
+                            self.gen_action("cancel", "取消", tx_content),
                         ]
                     }
                 ]
@@ -118,27 +116,14 @@ class BeanBotPlugin(Plugin):
         if date:
             start, end = parse_date(date[0])
         else:
-            start = datetime.date.today()
+            start = datetime.now().astimezone().date()
             end = start + timedelta(days=1)
         if start is None and end is None:
             self.driver.reply_to(message, f"Wrong args: {date}")
 
-        if (end - start).days == 1:
-            title = f"Expenses on {start}"
-        else:
-            # 查询这段时间的账户变动
-            title = f"Expenses between {start} - {end}"
-        query = (f'SELECT ROOT(account, {level}) as acc, cost(sum(position)) AS cost '
-                 f'WHERE date>={start} AND date<{end} GROUP BY acc ORDER BY acc;')
-
-        # query = f'SELECT account, cost(sum(position)) AS cost
-        # FROM OPEN ON {start} CLOSE ON {end} GROUP BY account ORDER BY account;'
-        # 等同于 BALANCES FROM OPEN ON ... CLOSE ON ...
-        # 查询结果中 Asset 均为关闭时间时刻的保有量
-
-        _, rows = bean_manager.run_query(query)
-        result = render_table(["Account", "Position"], rows)
-        self.driver.reply_to(message, f"**{title}**\n\n{result}")
+        resp_table = controller.fetch_bill(start, end, level)
+        result = render_table(resp_table.headers, resp_table.rows)
+        self.driver.reply_to(message, f"**{resp_table.title}**\n\n{result}")
 
     @listen_to("expense", direct_only=True, allowed_users=[OWNER_NAME])
     @click.command(help="查询支出")
@@ -148,33 +133,21 @@ class BeanBotPlugin(Plugin):
         if args:
             start, end = parse_date(args[0])
         else:
-            start = datetime.date.today()
+            start = datetime.now().astimezone().date()
             end = start + timedelta(days=1)
 
         if start is None and end is None:
             self.driver.reply_to(message, f"Wrong args: {args}")
             return
 
-        if (end - start).days == 1:
-            title = f"Cost on {start}"
-        else:
-            # 查询这段时间的账户支出
-            title = f" between {start} - {end}"
-        query = (f'SELECT ROOT(account, {level}) as acc, cost(sum(position)) AS cost '
-                 f'WHERE date>={start} AND date<{end} AND ROOT(account, 1)="Expenses" GROUP BY acc;')
-
-        _, rows = bean_manager.run_query(query)
-        result = render_table(["Account", "Position"], rows)
-        self.driver.reply_to(message, f"**{title}**\n\n{result}")
+        resp_table = controller.fetch_expense(start, end, level)
+        result = render_table(resp_table.headers, resp_table.rows)
+        self.driver.reply_to(message, f"**{resp_table.title}**\n\n{result}")
 
     @listen_to("build", direct_only=True, allowed_users=[OWNER_NAME])
     def build_db(self, message: Message):
-        if not conf.config.embedding.get("enable", True):
-            self.driver.reply_to(message, "Embedding is not enabled.")
-            return
-        entries = bean_manager.entries
-        tokens = txs_query.build_tx_db(entries)
-        self.driver.reply_to(message, f"Token usage: {tokens}")
+        msg = controller.build_db()
+        self.driver.reply_to(message, msg.content)
 
 
 def run_bot():

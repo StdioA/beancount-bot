@@ -175,8 +175,8 @@ class BeanManager:
         entries, _, _ = parser.parse_string(text)
         try:
             txs = next(e for e in entries if isinstance(e, Transaction))
-        except StopIteration:
-            raise NoTransactionError
+        except StopIteration as e:
+            raise NoTransactionError from e
 
         # Parse transaction from given string
         lines = [txs.meta["lineno"]] + [p.meta["lineno"] for p in txs.postings]
@@ -239,10 +239,3 @@ if __name__ == "__main__":
 
 
 bean_manager = BeanManager()
-
-
-if __name__ == "__main__":
-    print(bean_manager.generate_trx("12.8 微信 饮料 咖啡"))
-    print(bean_manager.generate_trx('12.8 微信 饮料 咖啡 "拿铁 AA"'))
-    print(bean_manager.generate_trx("12.8 南京银行 微信 转账"))
-    print(bean_manager.generate_trx("12.8 南京银行 微信 ”转账“ '转账1 转账2'"))

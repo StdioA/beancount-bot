@@ -2,16 +2,15 @@
 import time
 import telegram
 import logging
-from datetime import date, timedelta, datetime
+from datetime import timedelta, datetime
 from telegram import Update
 from telegram.ext import (
     Application, filters,
     MessageHandler, CommandHandler, CallbackQueryHandler
 )
-from beancount.core.inventory import Inventory
 from fava.util.date import parse_date
-from bean_utils.bean import bean_manager, NoTransactionError
-from bean_utils import txs_query
+from bean_utils.bean import bean_manager
+from bots import controller
 import conf
 
 
@@ -19,7 +18,7 @@ OWNER_ID = conf.config.bot.telegram.chat_id
 
 
 async def start(update, context):
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
     uptime = timedelta(seconds=time.monotonic())
     await update.message.reply_text(text=f"Now: {now}\nUptime: {uptime}")
 
@@ -34,77 +33,67 @@ def owner_required(func):
     return wrapped
 
 
-def render_table(header, rows):
-    data = [[header]]
+def _render_tg_table(headers, rows):
+    MARGIN = 2
+    max_widths = list(map(len, headers))
     for row in rows:
-        row_data = list(row)
-        for i, obj in enumerate(row):
-            if isinstance(obj, Inventory):
-                row_data[i] = obj.to_string()
-        data.append(row_data)
+        for i, cell in enumerate(row):
+            max_widths[i] = max(len(str(cell)), max_widths[i])
+    # Write header
+    table = []
+    raw_row = []
+    for i, header in enumerate(headers):
+        raw_row.append(f"{header}{' ' * (max_widths[i] - len(header) + MARGIN)}")
+    table.append(raw_row)
+    table.append("-" * (sum(max_widths) + MARGIN * (len(max_widths) - 1)))
+    # Write rows
+    for row in rows:
+        raw_row = []
+        for i, cell in enumerate(row):
+            raw_row.append(f"{cell}{' ' * (max_widths[i] - len(str(cell)) + MARGIN)}")
+        table.append(raw_row)
 
-    return "\n".join(["    ".join(row) for row in data])
+    return "\n".join("".join(row) for row in table)
+
+
+def _escape_md2(text):
+    return text.replace("-", "\\-").replace("*", "\\*")
+
+
+def _parse_bill_args(args):
+    root_level = 2
+    if args:
+        start, end = parse_date(args[0])
+        if len(args) > 1:
+            root_level = int(args[1])
+    else:
+        start = datetime.now().astimezone().date()
+        end = start + timedelta(days=1)
+    return start, end, root_level
 
 
 @owner_required
 async def bill(update, context):
-    args = context.args
-    root_level = 2
-    if args:
-        start, end = parse_date(args[0])
-        if len(args) > 1:
-            root_level = int(args[1])
-    else:
-        start = date.today()
-        end = start + timedelta(days=1)
-
+    start, end, root_level = _parse_bill_args(context.args)
     if start is None and end is None:
-        await update.message.reply_text(f"Wrong args: {args}")
-
-    if (end - start).days == 1:
-        header = f"Expenses on {start}"
-    else:
-        # 查询这段时间的账户变动
-        header = f"Expenses between {start} - {end}"
-    query = (f'SELECT ROOT(account, {root_level}) as acc, cost(sum(position)) AS cost '
-             f'WHERE date>={start} AND date<{end} GROUP BY acc ORDER BY acc;')
-
-    # query = f'SELECT account, cost(sum(position)) AS cost
-    # FROM OPEN ON {start} CLOSE ON {end} GROUP BY account ORDER BY account;'
-    # 等同于 BALANCES FROM OPEN ON ... CLOSE ON ...
-    # 查询结果中 Asset 均为关闭时间时刻的保有量
-
-    _, rows = bean_manager.run_query(query)
-    result = render_table(header, rows)
-    await update.message.reply_text(str(result))
+        await update.message.reply_text(f"Wrong args: {context.args}")
+        return
+    resp_table = controller.fetch_bill(start, end, root_level)
+    result = _render_tg_table(resp_table.headers, resp_table.rows)
+    await update.message.reply_text(_escape_md2(f"{resp_table.title}\n```\n{result}\n```"),
+                                    parse_mode="MarkdownV2")
 
 
 @owner_required
 async def expense(update, context):
-    args = context.args
-    root_level = 2
-    if args:
-        start, end = parse_date(args[0])
-        if len(args) > 1:
-            root_level = int(args[1])
-    else:
-        start = date.today()
-        end = start + timedelta(days=1)
-
+    start, end, root_level = _parse_bill_args(context.args)
     if start is None and end is None:
-        await update.message.reply_text(f"Wrong args: {args}")
-
-    if (end - start).days == 1:
-        header = f"Cost on {start}"
-    else:
-        # 查询这段时间的账户支出
-        header = f"Transaction between {start} - {end}"
-    query = (f'SELECT ROOT(account, {root_level}) as acc, cost(sum(position)) AS cost '
-             f'WHERE date>={start} AND date<{end} AND ROOT(account, 1)="Expenses" GROUP BY acc;')
-
-    _, rows = bean_manager.run_query(query)
-    result = render_table(header, rows)
-    await update.message.reply_text(str(result))
+        await update.message.reply_text(f"Wrong args: {context.args}")
+        return
+    resp_table = controller.fetch_expense(start, end, root_level)
+    result = _render_tg_table(resp_table.headers, resp_table.rows)
+    await update.message.reply_text(_escape_md2(f"{resp_table.title}\n```\n{result}\n```"),
+                                    parse_mode="MarkdownV2")
 
 
 _button_list = [
@@ -116,18 +105,18 @@ _pending_txs_reply_markup = telegram.InlineKeyboardMarkup([_button_list])
 
 @owner_required
 async def render(update, context):
-    try:
-        message = update.message
-        if update.message is None:
-            message = update.edited_message
-        trxs = bean_manager.generate_trx(message.text)
-    except Exception as e:
-        rendered = "{}: {}".format(e.__class__.__name__, str(e))
-        await update.message.reply_text(rendered, reply_to_message_id=message.message_id)
-    else:
-        for tx in trxs:
-            await update.message.reply_text(tx, reply_to_message_id=message.message_id,
-                                            reply_markup=_pending_txs_reply_markup)
+    message = update.message
+    if update.message is None:
+        message = update.edited_message
+
+    resp = controller.render_txs(message.text)
+    if isinstance(resp, controller.ErrorMessage):
+        await update.message.reply_text(resp.content, reply_to_message_id=message.message_id)
+        return
+
+    for tx in resp:
+        await update.message.reply_text(tx.content, reply_to_message_id=message.message_id,
+                                        reply_markup=_pending_txs_reply_markup)
 
 
 @owner_required
@@ -152,12 +141,8 @@ async def callback(update, context):
 
 @owner_required
 async def build_db(update, context):
-    if not conf.config.embedding.get("enable", True):
-        await update.message.reply_text("Embedding is not enabled.")
-        return
-    entries = bean_manager.entries
-    tokens = txs_query.build_tx_db(entries)
-    await update.message.reply_text(f"Token usage: {tokens}")
+    msg = controller.build_db()
+    await update.message.reply_text(msg.content)
 
 
 @owner_required
@@ -168,18 +153,12 @@ async def clone_txs(update, context):
         await update.message.reply_text("Please specify the transaction", reply_to_message_id=message.message_id)
         return
     # Fetch original message
-    refer_txs = message.text
-    try:
-        cloned_txs = bean_manager.clone_trx(refer_txs)
-    except Exception as e:
-        if e == NoTransactionError:
-            err_msg = e.args[0]
-        else:
-            err_msg = "{}: {}".format(e.__class__.__name__, str(e))
-        await update.message.reply_text(err_msg, reply_to_message_id=message.message_id)
-
-    await update.message.reply_text(cloned_txs, reply_to_message_id=message.message_id,
-                                    reply_markup=_pending_txs_reply_markup)
+    resp = controller.clone_txs(message.text)
+    if isinstance(message, controller.ErrorMessage):
+        await update.message.reply_text(resp.content, reply_to_message_id=message.message_id)
+    else:
+        await update.message.reply_text(resp.content, reply_to_message_id=message.message_id,
+                                        reply_markup=_pending_txs_reply_markup)
 
 
 def run_bot():
@@ -187,8 +166,8 @@ def run_bot():
 
     handlers = [
         CommandHandler('start', start),
-        CommandHandler('bill', bill, has_args=True),
-        CommandHandler('expense', expense, has_args=True),
+        CommandHandler('bill', bill),
+        CommandHandler('expense', expense),
         CommandHandler('build', build_db, has_args=False),
         CommandHandler('clone', clone_txs, filters=filters.REPLY, has_args=False),
         MessageHandler(filters.TEXT & (~filters.COMMAND), render),
@@ -197,7 +176,7 @@ def run_bot():
     for handler in handlers:
         application.add_handler(handler)
 
-    print("Bot start")
+    logging.info("Bot start")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
