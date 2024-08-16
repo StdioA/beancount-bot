@@ -7,6 +7,9 @@ import conf
 from vec_db import build_db, query_by_embedding
 
 
+_TIMEOUT = 30
+
+
 def embedding(texts):
     config = conf.config.embedding
     payload = {
@@ -19,7 +22,7 @@ def embedding(texts):
         "content-type": "application/json",
         "authorization": f"Bearer {config.api_key}",
     }
-    response = requests.post(config.api_url, json=payload, headers=headers)
+    response = requests.post(config.api_url, json=payload, headers=headers, timeout=_TIMEOUT)
     data = response.json()
     return data["data"], data["usage"]["total_tokens"]
 
@@ -105,7 +108,7 @@ def build_tx_db(transactions):
         total_usage += usage
 
     build_db(unique_txs_list)
-    logging.info(f"Total token usage: {total_usage}")
+    logging.info("Total token usage: %d", total_usage)
     return total_usage
 
 

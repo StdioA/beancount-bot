@@ -39,7 +39,7 @@ target-version = "py39"
 [lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 select = ["E4", "E7", "E9", "F", "DJ",
-          "YTT", "ASYNC", "TRIO", "S", "BLE", "B", "A", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "ISC", "ICN", "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "PTH", "TD", "FIX"]
+          "YTT", "ASYNC", "ASYNC", "S", "BLE", "B", "A", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "ISC", "ICN", "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "PTH", "TD", "FIX"]
 ignore = ["RET505", "SIM108", "PTH123", "S608"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

@@ -2,6 +2,7 @@ from datetime import date
 from dataclasses import dataclass
 from typing import List, Union, Any
 from beancount.core.inventory import Inventory
+import requests
 from bean_utils import txs_query
 from bean_utils.bean import bean_manager, NoTransactionError
 import conf
@@ -79,7 +80,7 @@ def fetch_bill(start: date, end: date, root_level: int = 2) -> Table:
 def clone_txs(message: str) -> Union[BaseMessage, ErrorMessage]:
     try:
         cloned_txs = bean_manager.clone_trx(message)
-    except Exception as e:
+    except (ValueError, requests.exceptions.RequestException) as e:
         if e == NoTransactionError:
             err_msg = e.args[0]
         else:
@@ -91,7 +92,7 @@ def clone_txs(message: str) -> Union[BaseMessage, ErrorMessage]:
 def render_txs(message_str: str) -> Union[List[BaseMessage], ErrorMessage]:
     try:
         trxs = bean_manager.generate_trx(message_str)
-    except Exception as e:
+    except (ValueError, requests.exceptions.RequestException) as e:
         rendered = "{}: {}".format(e.__class__.__name__, str(e))
         return ErrorMessage(rendered, e)
     return [BaseMessage(tx) for tx in trxs]

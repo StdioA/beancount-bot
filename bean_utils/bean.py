@@ -1,7 +1,10 @@
-import os
+import contextlib
+import shutil
+from pathlib import Path
 import re
-from datetime import date
+from datetime import datetime
 from decimal import Decimal
+import subprocess
 from beancount import loader
 from beancount.parser import parser
 from beancount.query import query
@@ -38,14 +41,14 @@ class BeanManager:
 
         # Fill mtime
         for f in self._options["include"]:
-            self.mtimes[f] = os.stat(f).st_mtime
+            self.mtimes[f] = Path.stat(f).st_mtime
 
     def _auto_reload(self, accounts_only=False):
         # Check and reload
         for f, mtime in self.mtimes.items():
             if accounts_only and ("accounts" not in f):
                 continue
-            if mtime != os.stat(f).st_mtime:
+            if mtime != Path.stat(f).st_mtime:
                 self._load()
                 return
 
@@ -111,17 +114,19 @@ class BeanManager:
         payee = None
 
         if from_account is None:
-            raise ValueError(f"Account {from_acc} not found")
+            err_msg = f"Account {from_acc} not found"
+            raise ValueError(err_msg)
         if to_account is None:
             payee = to_acc
             to_account = self.find_account_by_payee(payee)
             if to_account is None:
-                raise ValueError(f"Account {to_acc} not found")
+                err_msg = f"Account {to_acc} not found"
+                raise ValueError(err_msg)
 
         if payee is None:
             payee, *extra = extra
         kwargs = {
-            "date": date.today(),
+            "date": datetime.now().astimezone().date(),
             "payee": payee,
             "from_account": from_account,
             "to_account": to_account,
@@ -133,7 +138,7 @@ class BeanManager:
 
         tags = []
         for arg in extra:
-            if arg.startswith("#") or arg.startswith("^"):
+            if arg.startswith(("#", "^")):
                 tags.append(arg)
             elif not kwargs["desc"]:
                 kwargs["desc"] = arg
@@ -150,26 +155,22 @@ class BeanManager:
             vec_enabled = conf.config.embedding.get("enable", True)
             rag_enabled = conf.config.rag.get("enable", False)
             if rag_enabled:
-                today = str(date.today())
+                today = str(datetime.now().astimezone().date())
                 accounts = map(bean_manager.find_account, args[1:])
                 accounts = list(filter(bool, accounts))
                 completion = complete_rag(args, today, accounts)
                 return [self.clone_trx(completion)]
-            elif vec_enabled:
+            if vec_enabled:
                 # Query from vector db
                 candidate_txs = []
-                for args in self.match_new_args(args):
-                    try:
-                        candidate_txs.append(self.build_txs(args))
-                    except ValueError:
-                        pass
+                for new_args in self.match_new_args(args):
+                    with contextlib.suppress(ValueError):
+                        candidate_txs.append(self.build_txs(new_args))
                 if candidate_txs:
                     return candidate_txs
                 # If no match, raise original error,
                 # however it may not be happen if vecdb is built.
-                raise e
-            else:
-                raise e
+            raise e
 
     def clone_trx(self, text) -> str:
         entries, _, _ = parser.parse_string(text)
@@ -182,7 +183,7 @@ class BeanManager:
         lines = [txs.meta["lineno"]] + [p.meta["lineno"] for p in txs.postings]
         segments = text.split("\n")[min(lines)-1:max(lines)]
         # Modify date
-        today = str(date.today())
+        today = str(datetime.now().astimezone().date())
         segments[0] = TXS_DATE_RE.sub(rf"{today}\1", segments[0])
         return "\n".join(segments)
 
@@ -190,7 +191,11 @@ class BeanManager:
         fname = self.fname
         with open(fname, 'a') as f:
             f.write("\n" + data + "\n")
-        os.system(f"bean-format -o {fname} {fname} &")
+        subprocess.run(["bean-format", "-o", shutil.quote(fname), shutil.quote(fname)],   # noqa: S607,S603
+                       shell=False)
+
+
+ArgsError = ValueError("Quote not closed")
 
 
 def parse_args(line):
@@ -229,7 +234,7 @@ def parse_args(line):
         else:
             args.append(segment)
     if buffer:
-        raise ValueError("Quote not closed")
+        raise ArgsError
     return args
 
 

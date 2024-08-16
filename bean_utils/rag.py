@@ -57,7 +57,7 @@ def complete_rag(args, date, accounts):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {rag_config.api_key}",
     }
-    response = requests.post(rag_config.api_url, json=payload, headers=headers)
+    response = requests.post(rag_config.api_url, json=payload, headers=headers, timeout=_TIMEOUT)
     data = response.json()
     content = data["choices"][0]["message"]["content"]
     return content.strip("`\n")
