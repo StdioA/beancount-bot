@@ -1,5 +1,5 @@
 import contextlib
-import shutil
+import shlex
 from pathlib import Path
 import re
 from datetime import datetime
@@ -41,14 +41,14 @@ class BeanManager:
 
         # Fill mtime
         for f in self._options["include"]:
-            self.mtimes[f] = Path.stat(f).st_mtime
+            self.mtimes[f] = Path(f).stat().st_mtime
 
     def _auto_reload(self, accounts_only=False):
         # Check and reload
         for f, mtime in self.mtimes.items():
             if accounts_only and ("accounts" not in f):
                 continue
-            if mtime != Path.stat(f).st_mtime:
+            if mtime != Path(f).stat().st_mtime:
                 self._load()
                 return
 
@@ -191,7 +191,7 @@ class BeanManager:
         fname = self.fname
         with open(fname, 'a') as f:
             f.write("\n" + data + "\n")
-        subprocess.run(["bean-format", "-o", shutil.quote(fname), shutil.quote(fname)],   # noqa: S607,S603
+        subprocess.run(["bean-format", "-o", shlex.quote(fname), shlex.quote(fname)],   # noqa: S607,S603
                        shell=False)
 
 

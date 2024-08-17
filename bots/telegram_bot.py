@@ -130,7 +130,7 @@ async def callback(update, context):
     if choice == "提交":
         result_msg = "已提交 ✅"
         bean_manager.commit_trx(trx)
-        logging.info("Commit transaction\n", trx)
+        logging.info("Commit transaction: %s\n", trx)
     else:
         result_msg = "已取消 ❌"
         logging.info("Cancel transaction")

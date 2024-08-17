@@ -1,8 +1,13 @@
 import argparse
 import conf
+import logging
 
 
 if __name__ == "__main__":
+    # Init logging
+    logging.basicConfig(level=logging.INFO)
+    # logging.getLogger().addHandler(logging.StreamHandler())
+
     parser = argparse.ArgumentParser(prog='beanbot',
                                      description='Bot to translate text into beancount transaction')
     subparser = parser.add_subparsers(title='sub command', dest='command')

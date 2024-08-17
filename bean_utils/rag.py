@@ -4,6 +4,7 @@ from bean_utils.txs_query import embedding
 import conf
 
 
+_TIMEOUT = 30
 # flake8: noqa
 _PROMPT_TEMPLATE = """The user is using Beancount for bookkeeping. For simplicity, there is currently a set of accounting grammar that is converted by a program into complete transaction records. The format of the grammar is `<price> <outflow_account> [<inflow_account>] <payee> [<description>] [#<tag1> [#<tag2>] ...]`, where the inflow and outflow accounts are subject to fuzzy matching.
 
@@ -42,6 +43,7 @@ def complete_rag(args, date, accounts):
     prompt = _PROMPT_TEMPLATE.format(date=date, reference_records=reference_records, accounts=accounts)
     payload = {
         "model": rag_config.model,
+        "stream": False,
         "messages": [
             {
                 "role": "system",
@@ -59,5 +61,10 @@ def complete_rag(args, date, accounts):
     }
     response = requests.post(rag_config.api_url, json=payload, headers=headers, timeout=_TIMEOUT)
     data = response.json()
-    content = data["choices"][0]["message"]["content"]
+    if "choices" in data:
+        # ChatGPT-format response
+        content = data["choices"][0]["message"]["content"]
+    else:
+        # Ollama-format response
+        content = data["message"]["content"]
     return content.strip("`\n")

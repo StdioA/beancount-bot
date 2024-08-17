@@ -84,5 +84,4 @@ def query_by_embedding(embedding, sentence, candidate_amount):
         candidates.append(tx_row)
 
     candidates.sort(key=itemgetter("score"), reverse=True)
-    # print(candidates)
     return candidates
