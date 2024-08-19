@@ -1,0 +1,8 @@
+services:
+  beancount-bot:
+    image: ghcr.io/stdioa/beancount-bot
+    # command: ["telegram", "-c", "/data/ledger/config.yaml"]
+    volumes:
+      - .:/data/ledger
+    ports: []
+    restart: on-failure

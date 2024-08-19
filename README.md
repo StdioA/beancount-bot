@@ -12,19 +12,26 @@
 
 _Why is this document written in Chinese? Because the currently defined grammar rules are not as friendly to languages that contain spaces (such as English and French), as you should quote manually on payee and narration._
 
-## 安装
+## 运行
+### 通过 Docker 运行
+从 [`config.yaml.example`](config.yaml.example) 复制一份 `config.yaml` 到账本所在目录，并按需更改其中的内容（具体配置含义可参考配置文件中的注释）。
+
+然后下载 [compose.yaml](compose.yaml) 到账本所在目录。如果要运行 Mattermost bot，需要修改 `command` 的值，并配置 `ports` 以暴露端口接收 Webhook.
+
+最后运行 `docker compose up -d` 即可。
+
+### 通过命令行运行
 安装基本依赖：`pip install -r requirements.txt`
 
-若你的设备支持 [sqlite-vec](https://github.com/asg017/sqlite-vec)，则可以额外安装向量数据库组件 `pip install sqlite-vec==0.1.1`，并使用 sqlite 做数据库；若未安装 `sqlite-vec`，则 bot 会使用 json 来存储向量数据，并使用 numpy 进行向量计算。
+若你的设备支持 [sqlite-vec](https://github.com/asg017/sqlite-vec)，则可以额外安装向量数据库组件 `pip install sqlite-vec==0.1.1`，并使用 sqlite 作为数据库；若未安装 `sqlite-vec`，则 bot 会使用 json 来存储向量数据，并使用 numpy 进行向量计算。
 
 如果要使用 Telegram 作为前端，则安装 `python-telegram-bot`: `pip install python-telegram-bot==21.4`;  
 如果要使用 Mattermost 作为前端，则安装 `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
 
-## 使用
-从 `config.yaml.example` 复制一份 `config.yaml`，并按需更改其中的内容（具体配置含义可参考配置文件的注释）。  
-然后运行 bot: `python main.py telegram -c config.yaml` 或 `python main.py mattermost -c config.yaml`
+最后运行 bot: `python main.py telegram -c config.yaml` 或 `python main.py mattermost -c config.yaml`
 
-若使用 Telegram，可以预先在 [BotFather](https://telegram.me/BotFather) 处配置 bot 命令列表：
+## 使用
+若使用 Telegram 作为前端，可以预先在 [BotFather](https://telegram.me/BotFather) 处配置 bot 命令列表：
 
 ```
 start - ping
@@ -60,7 +67,7 @@ build - 重建向量数据库
 - [x] 使用向量数据库匹配时，支持输出多条备选（以弥补准确率的缺陷）
 - [x] 再记一笔
 - [ ] 撤回交易
-- [ ] docker 支持（github action & buildx）
+- [x] docker 支持（github action & buildx）
 - [ ] 单元测试
 - [ ] 基于 Web 的 Chat UI
 - [x] RAG（通过 LLM 进行更精确的元素替换，比如自动将“午饭”改成“晚饭”，或自动更改变更账户等）
