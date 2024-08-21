@@ -1,6 +1,7 @@
 import argparse
 import conf
 import logging
+from bean_utils.bean import init_bean_manager
 
 
 if __name__ == "__main__":
@@ -18,12 +19,14 @@ if __name__ == "__main__":
     mattermost_parser.add_argument('-c', nargs="?", type=str, default="config.yaml", help="config file path")
 
     args = parser.parse_args()
-    if args.command == "telegram":
+    if args.command is not None:
         conf.load_config(args.c)
+        init_bean_manager()
+
+    if args.command == "telegram":
         from bots.telegram_bot import run_bot
         run_bot()
     elif args.command == "mattermost":
-        conf.load_config(args.c)
         from bots.mmbot import run_bot
         run_bot()
     else:

@@ -80,7 +80,10 @@ async def bill(update, context):
         return
     resp_table = controller.fetch_bill(start, end, root_level)
     result = _render_tg_table(resp_table.headers, resp_table.rows)
-    await update.message.reply_text(_escape_md2(f"{resp_table.title}\n```\n{result}\n```"),
+    message = update.message
+    if update.message is None:
+        message = update.edited_message
+    await message.reply_text(_escape_md2(f"{resp_table.title}\n```\n{result}\n```"),
                                     parse_mode="MarkdownV2")
 
 
@@ -92,7 +95,10 @@ async def expense(update, context):
         return
     resp_table = controller.fetch_expense(start, end, root_level)
     result = _render_tg_table(resp_table.headers, resp_table.rows)
-    await update.message.reply_text(_escape_md2(f"{resp_table.title}\n```\n{result}\n```"),
+    message = update.message
+    if update.message is None:
+        message = update.edited_message
+    await message.reply_text(_escape_md2(f"{resp_table.title}\n```\n{result}\n```"),
                                     parse_mode="MarkdownV2")
 
 
@@ -178,9 +184,3 @@ def run_bot():
 
     logging.info("Bot start")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
-
-
-if __name__ == "__main__":
-    import conf
-    conf.load_config("config.yaml")
-    run_bot()

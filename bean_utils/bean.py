@@ -238,9 +238,9 @@ def parse_args(line):
     return args
 
 
-if __name__ == "__main__":
-    # Tricky initialize
-    conf.load_config("config.yaml")
+bean_manager = None
 
 
-bean_manager = BeanManager()
+def init_bean_manager(fname=None):
+    global bean_manager
+    bean_manager = BeanManager(fname)

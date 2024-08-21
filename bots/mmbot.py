@@ -167,9 +167,3 @@ def run_bot():
         plugins=[BeanBotPlugin()],  # Add your own plugins here.
     )
     bot.run()
-
-
-if __name__ == "__main__":
-    import conf
-    conf.load_config("config.yaml")
-    run_bot(conf.config)
