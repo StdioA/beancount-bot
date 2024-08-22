@@ -1,18 +1,12 @@
-FROM python:3.11
+FROM python:3.11-slim
 
-RUN apt-get update -q && apt-get install -y -q python3-lxml python3-numpy cmake sqlite3 && \
-    pip install --upgrade pip uv && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN mkdir -p /app
+RUN pip install --upgrade uv && mkdir -p /app
 WORKDIR /app
+COPY requirements-full.txt requirements-optional.txt /app/
 ENV VIRTUAL_ENV=/packages/.venv
-RUN mkdir -p $VIRTUAL_ENV && uv venv $VIRTUAL_ENV
-COPY requirements-full.txt /app/
-COPY requirements-optional.txt /app/
-RUN uv pip install --no-cache-dir -r requirements-full.txt
-RUN uv pip install --no-cache-dir -r requirements-optional.txt || true
+RUN mkdir -p $VIRTUAL_ENV && uv venv $VIRTUAL_ENV && \
+    uv pip install --no-cache-dir -r requirements-full.txt && \
+    (uv pip install --no-cache-dir -r requirements-optional.txt || true)
 COPY . /app
 
 VOLUME /data/ledger
