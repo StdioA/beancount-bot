@@ -1,9 +1,10 @@
 import contextlib
-import shlex
 from pathlib import Path
-import re
 from datetime import datetime
 from decimal import Decimal
+from gettext import gettext as _
+import re
+import shlex
 import subprocess
 from beancount import loader
 from beancount.parser import parser
@@ -114,13 +115,13 @@ class BeanManager:
         payee = None
 
         if from_account is None:
-            err_msg = f"Account {from_acc} not found"
+            err_msg = _("Account {acc} not found").format(acc=from_acc)
             raise ValueError(err_msg)
         if to_account is None:
             payee = to_acc
             to_account = self.find_account_by_payee(payee)
             if to_account is None:
-                err_msg = f"Account {to_acc} not found"
+                err_msg = _("Account {acc} not found").format(acc=to_acc)
                 raise ValueError(err_msg)
 
         if payee is None:

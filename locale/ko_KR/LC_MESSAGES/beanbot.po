@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-22 21:08+0800\n"
+"POT-Creation-Date: 2024-08-22 21:39+0800\n"
 "PO-Revision-Date: 2024-08-22 21:08+0800\n"
 "Last-Translator: David Dai <stdioa@163.com>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
@@ -17,6 +17,48 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#: bean_utils/bean.py:118 bean_utils/bean.py:124
+#, python-brace-format
+msgid "Account {acc} not found"
+msgstr "계정 {acc}을(를) 찾을 수 없습니다"
+
+#: bots/controller.py:32
+msgid "Embedding is not enabled."
+msgstr "임베딩이 활성화되지 않았습니다."
+
+#: bots/controller.py:35
+#, python-brace-format
+msgid "Token usage: {tokens}"
+msgstr "토큰 사용량: {tokens}"
+
+#: bots/controller.py:51
+#, python-brace-format
+msgid "Cost on {start}"
+msgstr "{start}에 대한 비용"
+
+#: bots/controller.py:54
+#, python-brace-format
+msgid "Transaction between {start} - {end}"
+msgstr "{start}부터 {end}까지의 거래"
+
+#: bots/controller.py:55 bots/controller.py:69
+msgid "Account"
+msgstr "계정"
+
+#: bots/controller.py:55 bots/controller.py:69
+msgid "Position"
+msgstr "포지션"
+
+#: bots/controller.py:65
+#, python-brace-format
+msgid "Account changes on {start}"
+msgstr "{start}에 대한 계정 변경"
+
+#: bots/controller.py:68
+#, python-brace-format
+msgid "Account changes between {start} - {end}"
+msgstr "{start}부터 {end}까지의 계정 변경"
 
 #: bots/mmbot.py:82 bots/telegram_bot.py:107
 msgid "Submit"

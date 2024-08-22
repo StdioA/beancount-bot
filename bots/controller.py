@@ -1,5 +1,6 @@
 from datetime import date
 from dataclasses import dataclass
+from gettext import gettext as _
 from typing import List, Union, Any
 from beancount.core.inventory import Inventory
 import requests
@@ -28,10 +29,10 @@ class Table:
 
 def build_db() -> BaseMessage:
     if not conf.config.embedding.get("enable", True):
-        return BaseMessage(content="Embedding is not enabled.")
+        return BaseMessage(content=_("Embedding is not enabled."))
     entries = bean_manager.entries
     tokens = txs_query.build_tx_db(entries)
-    return BaseMessage(content=f"Token usage: {tokens}")
+    return BaseMessage(content=_("Token usage: {tokens}").format(tokens=tokens))
 
 
 def _translate_rows(rows: List[List[Any]]) -> List[List[str]]:
@@ -47,25 +48,25 @@ def _translate_rows(rows: List[List[Any]]) -> List[List[str]]:
 
 def fetch_expense(start: date, end: date, root_level: int = 2) -> Table:
     if (end - start).days == 1:
-        title = f"Cost on {start}"
+        title = _("Cost on {start}").format(start=start)
     else:
         # 查询这段时间的账户支出
-        title = f"Transaction between {start} - {end}"
-    headers = ["Account", "Position"]
+        title = _("Transaction between {start} - {end}").format(start=start, end=end)
+    headers = [_("Account"), _("Position")]
     query = (f'SELECT ROOT(account, {root_level}) as acc, cost(sum(position)) AS cost '
              f'WHERE date>={start} AND date<{end} AND ROOT(account, 1)="Expenses" GROUP BY acc;')
 
-    _, rows = bean_manager.run_query(query)
+    __, rows = bean_manager.run_query(query)
     return Table(title=title, headers=headers, rows=_translate_rows(rows))
 
 
 def fetch_bill(start: date, end: date, root_level: int = 2) -> Table:
     if (end - start).days == 1:
-        title = f"Account changes on {start}"
+        title = _("Account changes on {start}").format(start=start)
     else:
         # 查询这段时间的账户变动
-        title = f"Account changes between {start} - {end}"
-    headers = ["Account", "Position"]
+        title = _("Account changes between {start} - {end}").format(start=start, end=end)
+    headers = [_("Account"), _("Position")]
     query = (f'SELECT ROOT(account, {root_level}) as acc, cost(sum(position)) AS cost '
              f'WHERE date>={start} AND date<{end} GROUP BY acc ORDER BY acc;')
 
@@ -73,7 +74,7 @@ def fetch_bill(start: date, end: date, root_level: int = 2) -> Table:
     # FROM OPEN ON {start} CLOSE ON {end} GROUP BY account ORDER BY account;'
     # 等同于 BALANCES FROM OPEN ON ... CLOSE ON ...
     # 查询结果中 Asset 均为关闭时间时刻的保有量
-    _, rows = bean_manager.run_query(query)
+    __, rows = bean_manager.run_query(query)
     return Table(title=title, headers=headers, rows=_translate_rows(rows))
 
 
