@@ -1,3 +1,5 @@
+language: zh_CN                           # If set, it can override the default locale from environment variables
+
 beancount:
   filename: main.bean                     # The entrypoint for all transactions, and generated transaction will also append to this file
   currency: CNY

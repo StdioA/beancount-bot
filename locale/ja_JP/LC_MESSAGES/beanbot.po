@@ -1,0 +1,43 @@
+# Japanese translations for PACKAGE package
+# PACKAGE �ѥå��������Ф������.
+# Copyright (C) 2024 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# David Dai <stdioa@163.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-22 21:07+0800\n"
+"PO-Revision-Date: 2024-08-22 21:07+0800\n"
+"Last-Translator: David Dai <stdioa@163.com>\n"
+"Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: bots/mmbot.py:82 bots/telegram_bot.py:107
+msgid "Submit"
+msgstr "送信"
+
+#: bots/mmbot.py:83 bots/telegram_bot.py:108
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: bots/mmbot.py:112
+msgid "Query account changes"
+msgstr "口座変更の照会"
+
+#: bots/mmbot.py:129
+msgid "Query expenses"
+msgstr "経費の照会"
+
+#: bots/telegram_bot.py:138
+msgid "Submitted ✅"
+msgstr "送信済み ✅"
+
+#: bots/telegram_bot.py:142
+msgid "Cancelled ❌"
+msgstr "キャンセル済み ❌"

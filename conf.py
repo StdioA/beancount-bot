@@ -1,4 +1,6 @@
+import os
 import yaml
+import gettext
 
 
 _ImmutableError = TypeError("This dictionary is immutable")
@@ -35,7 +37,7 @@ class Config:
     def __bool__(self):
         return bool(self._config)
 
-    def get(self, key, default):
+    def get(self, key, default=None):
         return self._config.get(key, default)
 
     def __getattr__(self, key):
@@ -60,3 +62,9 @@ config = None
 def load_config(config_path):
     global config
     config = Config(config_path)
+
+
+def set_locale():
+    if config.get("language") is not None:
+        os.environ['LANGUAGE'] = config.get("language")
+        gettext.translation("beanbot", config.get("language"), fallback=True).install()

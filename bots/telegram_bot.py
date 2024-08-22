@@ -1,8 +1,9 @@
 # coding: utf-8
 import time
-import telegram
+from gettext import gettext as _
 import logging
 from datetime import timedelta, datetime
+import telegram
 from telegram import Update
 from telegram.ext import (
     Application, filters,
@@ -103,8 +104,8 @@ async def expense(update, context):
 
 
 _button_list = [
-    telegram.InlineKeyboardButton("提交", callback_data="提交"),
-    telegram.InlineKeyboardButton("取消", callback_data="取消"),
+    telegram.InlineKeyboardButton(_("Submit"), callback_data="submit"),
+    telegram.InlineKeyboardButton(_("Cancel"), callback_data="cancel"),
 ]
 _pending_txs_reply_markup = telegram.InlineKeyboardMarkup([_button_list])
 
@@ -133,12 +134,12 @@ async def callback(update, context):
     query = update.callback_query
     await query.answer()
 
-    if choice == "提交":
-        result_msg = "已提交 ✅"
+    if choice == "submit":
+        result_msg = _("Submitted ✅")
         bean_manager.commit_trx(trx)
         logging.info("Commit transaction: %s\n", trx)
     else:
-        result_msg = "已取消 ❌"
+        result_msg = _("Cancelled ❌")
         logging.info("Cancel transaction")
 
     if result_msg:

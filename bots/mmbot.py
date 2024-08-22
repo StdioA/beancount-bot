@@ -1,5 +1,6 @@
 import click
 from datetime import datetime, timedelta
+from gettext import gettext as _
 from mmpy_bot import Bot, Settings
 from mmpy_bot import Plugin, listen_to, listen_webhook
 from mmpy_bot.plugins.base import PluginManager
@@ -78,8 +79,8 @@ class BeanBotPlugin(Plugin):
                 "attachments": [
                     {
                         "actions": [
-                            self.gen_action("submit", "提交", tx_content),
-                            self.gen_action("cancel", "取消", tx_content),
+                            self.gen_action("submit", _("Submit"), tx_content),
+                            self.gen_action("cancel", _("Cancel"), tx_content),
                         ]
                     }
                 ]
@@ -107,9 +108,8 @@ class BeanBotPlugin(Plugin):
             "data": {"post": {"id": post_id}},
         }), reaction)
 
-    # 需要改 listen_to 实现中对 reg 的替换代码，以支持单独命令输入
     @listen_to("bill", direct_only=True, allowed_users=[OWNER_NAME])
-    @click.command(help="查询账户变动")
+    @click.command(help=_("Query account changes"))
     @click.option("-l", "--level", default=2, type=int)
     @click.argument("date", nargs=-1, type=str)
     def bill(self, message: Message, level: int, date: str):
@@ -126,7 +126,7 @@ class BeanBotPlugin(Plugin):
         self.driver.reply_to(message, f"**{resp_table.title}**\n\n{result}")
 
     @listen_to("expense", direct_only=True, allowed_users=[OWNER_NAME])
-    @click.command(help="查询支出")
+    @click.command(help=_("Query expenses"))
     @click.option("-l", "--level", default=2, type=int)
     @click.argument("args", nargs=-1, type=str)
     def expense(self, message: Message, level: int, args: str):
