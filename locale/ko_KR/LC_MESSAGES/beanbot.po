@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-22 21:39+0800\n"
+"POT-Creation-Date: 2024-08-23 07:35+0800\n"
 "PO-Revision-Date: 2024-08-22 21:08+0800\n"
 "Last-Translator: David Dai <stdioa@163.com>\n"
 "Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: bean_utils/bean.py:118 bean_utils/bean.py:124
+#: bean_utils/bean.py:125 bean_utils/bean.py:131
 #, python-brace-format
 msgid "Account {acc} not found"
 msgstr "계정 {acc}을(를) 찾을 수 없습니다"
@@ -34,13 +34,13 @@ msgstr "토큰 사용량: {tokens}"
 
 #: bots/controller.py:51
 #, python-brace-format
-msgid "Cost on {start}"
-msgstr "{start}에 대한 비용"
+msgid "Expenditures on {start}"
+msgstr "{start}의 지출"
 
 #: bots/controller.py:54
 #, python-brace-format
-msgid "Transaction between {start} - {end}"
-msgstr "{start}부터 {end}까지의 거래"
+msgid "Expenditures between {start} - {end}"
+msgstr "{start}부터 {end}까지의 지출"
 
 #: bots/controller.py:55 bots/controller.py:69
 msgid "Account"
@@ -83,3 +83,7 @@ msgstr "제출됨 ✅"
 #: bots/telegram_bot.py:142
 msgid "Cancelled ❌"
 msgstr "취소됨 ❌"
+
+#, python-brace-format
+#~ msgid "Transaction between {start} - {end}"
+#~ msgstr "{start}부터 {end}까지의 거래"

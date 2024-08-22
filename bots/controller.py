@@ -41,17 +41,17 @@ def _translate_rows(rows: List[List[Any]]) -> List[List[str]]:
         row_data = list(row)
         for i, obj in enumerate(row):
             if isinstance(obj, Inventory):
-                row_data[i] = obj.to_string()
+                row_data[i] = obj.to_string(parens=False)
         parsed_rows.append(row_data)
     return parsed_rows
 
 
 def fetch_expense(start: date, end: date, root_level: int = 2) -> Table:
     if (end - start).days == 1:
-        title = _("Cost on {start}").format(start=start)
+        title = _("Expenditures on {start}").format(start=start)
     else:
         # 查询这段时间的账户支出
-        title = _("Transaction between {start} - {end}").format(start=start, end=end)
+        title = _("Expenditures between {start} - {end}").format(start=start, end=end)
     headers = [_("Account"), _("Position")]
     query = (f'SELECT ROOT(account, {root_level}) as acc, cost(sum(position)) AS cost '
              f'WHERE date>={start} AND date<{end} AND ROOT(account, 1)="Expenses" GROUP BY acc;')

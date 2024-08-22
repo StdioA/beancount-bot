@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-22 21:39+0800\n"
+"POT-Creation-Date: 2024-08-23 07:35+0800\n"
 "PO-Revision-Date: 2024-08-22 20:40+0800\n"
 "Last-Translator: David Dai <stdioa@163.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bean_utils/bean.py:118 bean_utils/bean.py:124
+#: bean_utils/bean.py:125 bean_utils/bean.py:131
 #, python-brace-format
 msgid "Account {acc} not found"
 msgstr "账户 {acc} 未找到"
@@ -33,13 +33,13 @@ msgstr "令牌使用量：{tokens}"
 
 #: bots/controller.py:51
 #, python-brace-format
-msgid "Cost on {start}"
+msgid "Expenditures on {start}"
 msgstr "{start} 的支出"
 
 #: bots/controller.py:54
 #, python-brace-format
-msgid "Transaction between {start} - {end}"
-msgstr "{start} 至 {end} 之间的交易"
+msgid "Expenditures between {start} - {end}"
+msgstr "{start} 至 {end} 之间的支出"
 
 #: bots/controller.py:55 bots/controller.py:69
 msgid "Account"
@@ -82,3 +82,7 @@ msgstr "已提交 ✅"
 #: bots/telegram_bot.py:142
 msgid "Cancelled ❌"
 msgstr "已取消 ❌"
+
+#, python-brace-format
+#~ msgid "Transaction between {start} - {end}"
+#~ msgstr "{start} 至 {end} 之间的交易"

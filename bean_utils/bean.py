@@ -10,6 +10,7 @@ from beancount import loader
 from beancount.parser import parser
 from beancount.query import query
 from beancount.core.data import Open, Transaction
+from beancount.core.number import MISSING
 from typing import List
 from bean_utils.txs_query import query_txs
 from bean_utils.rag import complete_rag
@@ -74,7 +75,8 @@ class BeanManager:
                 return account
         return None
 
-    def find_account_by_payee(self, payee, kind="Expenses"):
+    def find_account_by_payee(self, payee):
+        # Find the account with the same payee
         target = None
         for trx in reversed(self._entries):
             if not isinstance(trx, Transaction):
@@ -84,10 +86,15 @@ class BeanManager:
                 break
         else:
             return None
+        expense_account = None
+        # Find the posting with missing units
+        # If not found, return the first expense account
         for posting in target.postings:
-            if posting.account.startswith(kind):
+            if posting.units is MISSING:
                 return posting.account
-        return None
+            elif posting.account.startswith("Expenses:") and expense_account is None:
+                expense_account = posting.account
+        return expense_account
 
     def run_query(self, q):
         return query.run_query(self.entries, self.options, q)
