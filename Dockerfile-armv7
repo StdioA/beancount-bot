@@ -1,0 +1,31 @@
+# Build beancount from source due to wheel for arm/v7 is not provided
+FROM python:3.11 AS builder
+
+RUN apt-get update -q && apt-get install -y -q python3-lxml python3-numpy cmake && \
+    pip install --upgrade uv && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+WORKDIR /app
+ENV VIRTUAL_ENV=/packages/.venv
+COPY requirements-full.txt requirements-optional.txt /app/
+RUN mkdir -p $VIRTUAL_ENV && uv venv $VIRTUAL_ENV
+RUN uv pip install --no-cache-dir -r requirements-full.txt && \
+    (uv pip install --no-cache-dir -r requirements-optional.txt || true)
+
+
+FROM python:3.11-slim
+
+RUN pip install --upgrade uv && mkdir -p /app
+WORKDIR /app
+COPY requirements-full.txt requirements-optional.txt /app/
+ENV VIRTUAL_ENV=/packages/.venv
+RUN mkdir -p $VIRTUAL_ENV && uv venv $VIRTUAL_ENV
+COPY --from=builder /packages/.venv/lib/ $VIRTUAL_ENV/lib/
+RUN uv pip install --no-cache-dir -r requirements-full.txt && \
+    (uv pip install --no-cache-dir -r requirements-optional.txt || true)
+COPY . /app
+
+VOLUME /data/ledger
+WORKDIR /data/ledger
+ENTRYPOINT ["/app/entrypoint.sh", "python", "/app/main.py"]
+CMD ["telegram"]
