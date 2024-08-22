@@ -1,84 +1,85 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Spanish translations for PACKAGE package
+# Traducciones al español para el paquete PACKAGE.
+# Copyright (C) 2024 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# David Dai <stdioa@163.com>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-23 07:49+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2024-08-23 07:49+0800\n"
+"Last-Translator: David Dai <stdioa@163.com>\n"
+"Language-Team: Spanish <es@tp.org.es>\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: bean_utils/bean.py:125 bean_utils/bean.py:131
 #, python-brace-format
 msgid "Account {acc} not found"
-msgstr ""
+msgstr "Cuenta {acc} no encontrada"
 
 #: bots/controller.py:32
 msgid "Embedding is not enabled."
-msgstr ""
+msgstr "Incrustación no está habilitada."
 
 #: bots/controller.py:35
 #, python-brace-format
 msgid "Token usage: {tokens}"
-msgstr ""
+msgstr "Uso de tokens: {tokens}"
 
 #: bots/controller.py:51
 #, python-brace-format
 msgid "Expenditures on {start}"
-msgstr ""
+msgstr "Gastos en {start}"
 
 #: bots/controller.py:54
 #, python-brace-format
 msgid "Expenditures between {start} - {end}"
-msgstr ""
+msgstr "Gastos entre {start} - {end}"
 
 #: bots/controller.py:55 bots/controller.py:69
 msgid "Account"
-msgstr ""
+msgstr "Cuenta"
 
 #: bots/controller.py:55 bots/controller.py:69
 msgid "Position"
-msgstr ""
+msgstr "Posición"
 
 #: bots/controller.py:65
 #, python-brace-format
 msgid "Account changes on {start}"
-msgstr ""
+msgstr "Cambios en la cuenta en {start}"
 
 #: bots/controller.py:68
 #, python-brace-format
 msgid "Account changes between {start} - {end}"
-msgstr ""
+msgstr "Cambios en la cuenta entre {start} - {end}"
 
 #: bots/mmbot.py:82 bots/telegram_bot.py:107
 msgid "Submit"
-msgstr ""
+msgstr "Enviar"
 
 #: bots/mmbot.py:83 bots/telegram_bot.py:108
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: bots/mmbot.py:112
 msgid "Query account changes"
-msgstr ""
+msgstr "Consultar cambios en la cuenta"
 
 #: bots/mmbot.py:129
 msgid "Query expenses"
-msgstr ""
+msgstr "Consultar gastos"
 
 #: bots/telegram_bot.py:138
 msgid "Submitted ✅"
-msgstr ""
+msgstr "Enviado ✅"
 
 #: bots/telegram_bot.py:142
 msgid "Cancelled ❌"
-msgstr ""
+msgstr "Cancelado ❌"

@@ -1,5 +1,5 @@
 
-LANGUAGES := en zh_CN zh_TW fr_FR ja_JP ko_KR
+LANGUAGES := en zh_CN zh_TW fr_FR ja_JP ko_KR de_DE es_ES
 
 gentranslations:
 	xgettext -d beanbot -o locale/beanbot.pot **/*.py
