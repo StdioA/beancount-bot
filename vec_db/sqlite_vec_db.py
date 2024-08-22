@@ -1,3 +1,4 @@
+import pathlib
 import logging
 from operator import itemgetter
 import sqlite3
@@ -5,6 +6,7 @@ import sqlite_vec
 from typing import List
 import struct
 from vec_db.match import calculate_score
+import conf
 
 
 def serialize_f32(vector: List[float]) -> bytes:
@@ -12,13 +14,30 @@ def serialize_f32(vector: List[float]) -> bytes:
     return struct.pack("%sf" % len(vector), *vector)
 
 
-db = sqlite3.connect("tx_db.sqlite")
-db.enable_load_extension(True)
-sqlite_vec.load(db)
-db.enable_load_extension(False)
+def _get_db_name():
+    DB_NAME = "tx_db.sqlite"
+    db_dir = conf.config.embedding.get("db_store_folder", ".")
+    return pathlib.Path(db_dir) / DB_NAME
+
+
+_db = None
+
+
+def get_db():
+    global _db
+    if _db is not None:
+        return _db
+
+    _db = sqlite3.connect(_get_db_name())
+    _db.enable_load_extension(True)
+    sqlite_vec.load(_db)
+    _db.enable_load_extension(False)
+    return _db
 
 
 def build_db(txs):
+    db = get_db()
+
     embedding_dimention = 1
     if txs:
         embedding_dimention = len(txs[0]["embedding"])
@@ -49,6 +68,8 @@ def build_db(txs):
 
 
 def query_by_embedding(embedding, sentence, candidate_amount):
+    db = get_db()
+
     try:
         rows = db.execute(
             f"""

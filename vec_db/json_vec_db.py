@@ -1,22 +1,27 @@
+import pathlib
 import json
 import logging
 from operator import itemgetter
 import numpy as np
 from numpy.linalg import norm
 from vec_db.match import calculate_score
+import conf
 
 
-DB_NAME = "tx_db.json"
+def _get_db_name():
+    DB_NAME = "tx_db.json"
+    db_dir = conf.config.embedding.get("db_store_folder", ".")
+    return pathlib.Path(db_dir) / DB_NAME
 
 
 def build_db(transactions):
-    with open(DB_NAME, "w") as f:
+    with open(_get_db_name(), "w") as f:
         json.dump(transactions, f)
 
 
 def query_by_embedding(embedding, sentence, candidate_amount):
     try:
-        with open("tx_db.json") as f:
+        with open(_get_db_name()) as f:
             transactions = json.load(f)
     except FileExistsError:
         logging.warning("JSON vector database is not built")

@@ -1,18 +1,3 @@
-embedding:
-  enable: true                            # Disable it if you care about privacy
-  api_url: "https://api.siliconflow.cn/v1/embeddings"  # OpenAI compatible API endpoint
-  api_key: "{your_key_here}"
-  model: "BAAI/bge-large-zh-v1.5"
-  transaction_amount: 1000                # Only fetch the latest 1000 dinstinct transactions when building vector DB
-  candidates: 3                           # Select 3 entry and sort them with weight
-  output_amount: 1                        # Output at most 1 candidates during vector match
-
-rag:
-  enable: false                           # Disable it if you care about privacy, disabled by default
-  api_url: "https://api.deepseek.com/v1/chat/completions"  # OpenAI compatible API endpoint
-  api_key: "{your_key_here}"
-  model: "deepseek-chat"
-
 beancount:
   filename: main.bean                     # The entrypoint for all transactions, and generated transaction will also append to this file
   currency: CNY
@@ -32,3 +17,19 @@ bot:
     webhook_host_port: 8308
     webhook_host_url: "{webhook_host}"
     owner_user: "{chat_owner}"
+
+embedding:
+  enable: true                            # Disable it if you care about privacy
+  api_url: "https://api.siliconflow.cn/v1/embeddings"  # OpenAI compatible API endpoint
+  api_key: "{your_key_here}"
+  model: "BAAI/bge-large-zh-v1.5"
+  db_store_folder: "."                    # The folder to store vector db (tx_db.json or tx_db.sqlite)
+  transaction_amount: 1000                # Only fetch the latest 1000 dinstinct transactions when building vector DB
+  candidates: 3                           # Select 3 entry and sort them with weight
+  output_amount: 1                        # Output at most 1 candidates during vector match
+
+rag:
+  enable: false                           # Disable it if you care about privacy, disabled by default
+  api_url: "https://api.deepseek.com/v1/chat/completions"  # OpenAI compatible API endpoint
+  api_key: "{your_key_here}"
+  model: "deepseek-chat"
