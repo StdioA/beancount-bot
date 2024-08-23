@@ -20,10 +20,8 @@ locale/$(1)/LC_MESSAGES/beanbot.po: $(POT_FILE)
 	@mkdir -p $$(dir $$@)
 	@if [ ! -f $$@ ]; then \
 		msginit -i $$< -o $$@ -l $(1); \
-	elif [ $$< -nt $$@ ]; then \
-		msgmerge --update $$@ $$<; \
 	else \
-		echo "$$@ is up to date"; \
+		msgmerge --update $$@ $$<; \
 	fi
 endef
 

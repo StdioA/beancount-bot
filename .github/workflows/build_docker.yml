@@ -6,6 +6,9 @@ on:
       - master
     paths-ignore:
       - 'README.md'
+      - 'README_zh.md'
+      - 'Makefile'
+      - 'ruff.toml'
   workflow_dispatch:
 
 env:
