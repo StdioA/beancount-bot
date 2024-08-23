@@ -1,6 +1,5 @@
 import os
 import yaml
-import gettext
 
 
 _ImmutableError = TypeError("This dictionary is immutable")
@@ -66,5 +65,8 @@ def load_config(config_path):
 
 def set_locale():
     if config.get("language") is not None:
+        # Only in this way can I override default language for gettext.gettext
         os.environ['LANGUAGE'] = config.get("language")
-        gettext.translation("beanbot", config.get("language"), fallback=True).install()
+        # `install` also works, but it's not recommended after python 3.8, and it will cause lint error
+        # gettext.translation("beanbot", config.get("language"), fallback=True).install()
+        # Otherwise, I can write my own `_` function, which can take from `some_translation.gettext`
