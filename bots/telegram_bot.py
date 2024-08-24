@@ -1,6 +1,6 @@
 # coding: utf-8
 import time
-from gettext import gettext as _
+from conf.i18n import gettext as _
 import logging
 from datetime import timedelta, datetime
 import telegram

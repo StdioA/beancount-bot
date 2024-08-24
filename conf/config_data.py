@@ -1,4 +1,3 @@
-import os
 import yaml
 
 
@@ -53,20 +52,3 @@ class Config:
         config = cls.__new__(cls)
         config._config = ImmutableDict(dictionary)  # noqa: SLF001
         return config
-
-
-config = None
-
-
-def load_config(config_path):
-    global config
-    config = Config(config_path)
-
-
-def set_locale():
-    if config.get("language") is not None:
-        # Only in this way can I override default language for gettext.gettext
-        os.environ['LANGUAGE'] = config.get("language")
-        # `install` also works, but it's not recommended after python 3.8, and it will cause lint error
-        # gettext.translation("beanbot", config.get("language"), fallback=True).install()
-        # Otherwise, I can write my own `_` function, which can take from `some_translation.gettext`

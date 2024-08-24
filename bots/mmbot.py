@@ -1,6 +1,6 @@
 import click
 from datetime import datetime, timedelta
-from gettext import gettext as _
+from conf.i18n import gettext as _
 from mmpy_bot import Bot, Settings
 from mmpy_bot import Plugin, listen_to, listen_webhook
 from mmpy_bot.plugins.base import PluginManager

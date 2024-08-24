@@ -1,6 +1,6 @@
 from datetime import date
 from dataclasses import dataclass
-from gettext import gettext as _
+from conf.i18n import gettext as _
 from typing import List, Union, Any
 from beancount.core.inventory import Inventory
 import requests

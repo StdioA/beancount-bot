@@ -2,7 +2,7 @@ import contextlib
 from pathlib import Path
 from datetime import datetime
 from decimal import Decimal
-from gettext import gettext as _
+from conf.i18n import gettext as _
 import re
 import shlex
 import subprocess

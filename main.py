@@ -1,15 +1,7 @@
 import argparse
-import gettext
-import pathlib
 import conf
 import logging
 from bean_utils.bean import init_bean_manager
-
-
-def _init_locale():
-    locale_dir = pathlib.Path(__file__).parent / 'locale'
-    gettext.bindtextdomain('beanbot', locale_dir)
-    gettext.textdomain('beanbot')
 
 
 if __name__ == "__main__":
@@ -30,8 +22,7 @@ if __name__ == "__main__":
     if args.command is not None:
         conf.load_config(args.c)
         # Init i18n
-        conf.set_locale()
-        _init_locale()
+        conf.init_locale()
         init_bean_manager()
 
     if args.command == "telegram":
