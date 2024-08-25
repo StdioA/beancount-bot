@@ -1,4 +1,8 @@
 # Beancount bot
+[![Maintainability](https://api.codeclimate.com/v1/badges/1d9a175911e39f5b576f/maintainability)](https://codeclimate.com/github/StdioA/beancount-bot/maintainability)
+[![codecov](https://codecov.io/github/StdioA/beancount-bot/graph/badge.svg?token=PPEO1607AJ)](https://codecov.io/github/StdioA/beancount-bot)
+![ghcr image size](https://ghcr-badge.egpl.dev/stdioa/beancount-bot/size?color=%2344cc11&tag=latest&label=image+size&trim=)
+
 [English Readme](README.md)
 
 一个可以通过聊天软件快速手动记录简单交易的 beancount bot.
@@ -68,7 +72,7 @@ build - 重建向量数据库
 - [x] 再记一笔
 - [ ] 撤回交易
 - [x] Docker 支持
-- [ ] 单元测试
+- [x] 单元测试
 - [ ] 基于 Web 的 Chat UI
 - [x] RAG（通过 LLM 进行更精确的元素替换，比如自动将“午饭”改成“晚饭”，或自动更改变更账户等）
 - [ ] 支持增量构建向量数据库（如果用 OpenAI 的 `text-embedding-3-large`，目前构建 1000 条交易组成的数据库大概只需要 ￥0.01，而且目前提供 embedding 的供应商大多不对 embedding 功能收费，所以优先级不高）

@@ -1,5 +1,7 @@
 # Beancount Bot
-[![codecov](https://codecov.io/github/StdioA/beancount-bot/graph/badge.svg?token=PPEO1607AJ)](https://codecov.io/github/StdioA/beancount-bot) ![ghcr image size](https://ghcr-badge.egpl.dev/stdioa/beancount-bot/size?color=%2344cc11&tag=latest&label=image+size&trim=)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1d9a175911e39f5b576f/maintainability)](https://codeclimate.com/github/StdioA/beancount-bot/maintainability)
+[![codecov](https://codecov.io/github/StdioA/beancount-bot/graph/badge.svg?token=PPEO1607AJ)](https://codecov.io/github/StdioA/beancount-bot)
+![ghcr image size](https://ghcr-badge.egpl.dev/stdioa/beancount-bot/size?color=%2344cc11&tag=latest&label=image+size&trim=)
 
 [中文文档](README_zh.md)
 
