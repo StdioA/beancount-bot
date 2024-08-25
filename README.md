@@ -20,12 +20,12 @@ A Beancount bot that allows for quick manual recording of simple transactions vi
 ### Running with Docker
 Copy `config.yaml` from [`config.yaml.example`](config.yaml.example) to your ledger directory and modify its contents as needed (refer to comments in the configuration file for specific meanings).
 
-Then download [compose.yaml](compose.yaml) to the ledger directory. If you want to run a Mattermost bot, modify the `command` value and configure `ports` to expose ports for receiving Webhooks.
+Then download [docker/compose.yaml](docker/compose.yaml) to the ledger directory. If you want to run a Mattermost bot, modify the `command` value and configure `ports` to expose ports for receiving Webhooks.
 
 Finally, run `docker compose up -d`.
 
 ### Running via Command Line
-Install basic dependencies firstly: `pip install -r requirements.txt`
+Install basic dependencies firstly: `pip install -r requirements/requirements.txt`
 
 If your device supports [sqlite-vec](https://github.com/asg017/sqlite-vec), you can additionally install the vector database component `pip install sqlite-vec==0.1.1` and use sqlite as the database; if `sqlite-vec` is not installed, the bot will use json to store vector data and numpy for vector calculations.
 

@@ -20,12 +20,12 @@
 ### 通过 Docker 运行
 从 [`config.yaml.example`](config.yaml.example) 复制一份 `config.yaml` 到账本所在目录，并按需更改其中的内容（具体配置含义可参考配置文件中的注释）。
 
-然后下载 [compose.yaml](compose.yaml) 到账本所在目录。如果要运行 Mattermost bot，需要修改 `command` 的值，并配置 `ports` 以暴露端口接收 Webhook.
+然后下载 [docker/compose.yaml](docker/compose.yaml) 到账本所在目录。如果要运行 Mattermost bot，需要修改 `command` 的值，并配置 `ports` 以暴露端口接收 Webhook.
 
 最后运行 `docker compose up -d` 即可。
 
 ### 通过命令行运行
-安装基本依赖：`pip install -r requirements.txt`
+安装基本依赖：`pip install -r requirements/requirements.txt`
 
 若你的设备支持 [sqlite-vec](https://github.com/asg017/sqlite-vec)，则可以额外安装向量数据库组件 `pip install sqlite-vec==0.1.1`，并使用 sqlite 作为数据库；若未安装 `sqlite-vec`，则 bot 会使用 json 来存储向量数据，并使用 numpy 进行向量计算。
 

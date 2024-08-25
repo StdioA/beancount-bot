@@ -1,5 +1,6 @@
 .DS_Store
 .ruff_cache
+.pytest_cache
 __pycache__
 tx_db.*
 config.yaml

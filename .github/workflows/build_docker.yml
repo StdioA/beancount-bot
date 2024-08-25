@@ -45,7 +45,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          file: Dockerfile
+          file: docker/Dockerfile
           push: true
           tags: |
             ${{ env.GHCR_REPO }}:latest
@@ -58,7 +58,7 @@ jobs:
         with:
           context: .
           platforms: linux/arm/v7
-          file: Dockerfile-armv7
+          file: docker/Dockerfile-armv7
           push: true
           tags: |
             ${{ env.GHCR_REPO }}:latest
