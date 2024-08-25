@@ -29,9 +29,14 @@ jobs:
         pip install "sqlite-vec==0.1.1"
         pip install pytest pytest-cov coverage codecov
     - name: Test with pytest
-      run: |
-        pytest --cov
+      run: pytest --cov
     - name: Upload results to Codecov
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Upload results to Code Climate
+      uses: paambaati/codeclimate-action@v9.0.0
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      with:
+        coverageCommand: coverage xml

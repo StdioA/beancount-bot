@@ -5,4 +5,5 @@ tx_db.*
 config.yaml
 **/*.po~
 .coverage
+coverage.xml
 htmlcov
