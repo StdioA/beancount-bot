@@ -1,16 +1,15 @@
 import pytest
 from typing import List
 from conf import _load_config_from_dict, config
-import tempfile
 from vec_db import json_vec_db
 
 
 @pytest.fixture
-def mock_config():
+def mock_config(tmp_path):
     conf_data = {
         "embedding": {
             "enable": True,
-            "db_store_folder": tempfile.gettempdir(),
+            "db_store_folder": tmp_path,
         }
     }
     _load_config_from_dict(conf_data)
@@ -23,7 +22,7 @@ def easy_embedding(content: str) -> List[float]:
     _width = 64
     for _ in range(_width - len(embed)):
         embed.append(0.0)
-    return embed
+    return embed[:_width]
 
 
 def test_json_db(mock_config):

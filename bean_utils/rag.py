@@ -1,6 +1,6 @@
 import requests
 from vec_db import query_by_embedding
-from bean_utils.txs_query import embedding
+from bean_utils import txs_query
 import conf
 
 
@@ -38,7 +38,7 @@ def complete_rag(args, date, accounts):
     candidates = conf.config.embedding.candidates or 3
     rag_config = conf.config.rag
 
-    match = query_by_embedding(embedding([stripped_input])[0][0]["embedding"], stripped_input, candidates)
+    match = query_by_embedding(txs_query.embedding([stripped_input])[0][0]["embedding"], stripped_input, candidates)
     reference_records = "\n------\n".join([x["content"] for x in match])
     prompt = _PROMPT_TEMPLATE.format(date=date, reference_records=reference_records, accounts=accounts)
     payload = {

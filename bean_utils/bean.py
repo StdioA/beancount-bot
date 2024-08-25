@@ -113,7 +113,7 @@ class BeanManager:
             candidate_args.append(new_args)
         return candidate_args
 
-    def build_txs(self, args):
+    def build_trx(self, args):
         amount, from_acc, to_acc, *extra = args
 
         amount = Decimal(amount)
@@ -158,13 +158,13 @@ class BeanManager:
     def generate_trx(self, line) -> List[str]:
         args = parse_args(line)
         try:
-            return [self.build_txs(args)]
+            return [self.build_trx(args)]
         except ValueError as e:
             vec_enabled = conf.config.embedding.get("enable", True)
             rag_enabled = conf.config.rag.get("enable", False)
             if rag_enabled:
                 today = str(datetime.now().astimezone().date())
-                accounts = map(bean_manager.find_account, args[1:])
+                accounts = map(self.find_account, args[1:])
                 accounts = list(filter(bool, accounts))
                 completion = complete_rag(args, today, accounts)
                 return [self.clone_trx(completion)]
@@ -173,7 +173,7 @@ class BeanManager:
                 candidate_txs = []
                 for new_args in self.match_new_args(args):
                     with contextlib.suppress(ValueError):
-                        candidate_txs.append(self.build_txs(new_args))
+                        candidate_txs.append(self.build_trx(new_args))
                 if candidate_txs:
                     return candidate_txs
                 # If no match, raise original error,
