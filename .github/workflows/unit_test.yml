@@ -27,8 +27,11 @@ jobs:
         python -m pip install "pip<24.1"
         pip install -r requirements-full.txt
         pip install "sqlite-vec==0.1.1"
+        pip install pytest pytest-cov coverage codecov
     - name: Test with pytest
       run: |
-        pip install pytest pytest-cov coverage
-        coverage run -m pytest
-        coverage report --include="**/*.py" --omit="**/*_test.py"
+        pytest --cov
+    - name: Upload results to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}

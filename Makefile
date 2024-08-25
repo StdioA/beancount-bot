@@ -38,6 +38,6 @@ lint:
 	@ruff check
 
 test:
-	coverage run -m pytest
-	coverage report --include="**/*.py" --omit="**/*_test.py"
-	@coverage html --include="**/*.py" --omit="**/*_test.py"
+	coverage run --source=. --omit="**/*_test.py,bots/mmbot.py,bots/telegram_bot.py" -m pytest 
+	coverage report
+	@coverage html

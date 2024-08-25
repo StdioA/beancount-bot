@@ -1,4 +1,6 @@
 # Beancount Bot
+[![codecov](https://codecov.io/github/StdioA/beancount-bot/graph/badge.svg?token=PPEO1607AJ)](https://codecov.io/github/StdioA/beancount-bot) ![ghcr image size](https://ghcr-badge.egpl.dev/stdioa/beancount-bot/size?color=%2344cc11&tag=latest&label=image+size&trim=)
+
 [中文文档](README_zh.md)
 
 A Beancount bot that allows for quick manual recording of simple transactions via IM software.
