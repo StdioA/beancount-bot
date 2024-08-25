@@ -39,5 +39,5 @@ lint:
 
 test:
 	coverage run -m pytest
-	coverage report
-	@coverage html --include="**/*.py"
+	coverage report --include="**/*.py" --omit="**/*_test.py"
+	@coverage html --include="**/*.py" --omit="**/*_test.py"
