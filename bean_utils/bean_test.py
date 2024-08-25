@@ -4,7 +4,7 @@ import pytest
 from conf import _load_config_from_dict
 from conf.config_data import Config
 from beancount.parser import parser
-from bean_utils import bean, txs_query, rag
+from bean_utils import bean, txs_query
 
 
 today = str(datetime.now().astimezone().date())
@@ -60,6 +60,10 @@ def test_account_search(mock_config):
     assert exp_account == "Income:US:ETrade:PnL"
 
     # Find account by payee
+    # Select by missing unit
+    exp_account = manager.find_account_by_payee("Chichipotle")
+    assert exp_account == "Expenses:Food:Restaurant"
+    # Select by account type
     exp_account = manager.find_account_by_payee("China Garden")
     assert exp_account == "Expenses:Food:Restaurant"
 
@@ -144,7 +148,7 @@ def mock_embedding(texts):
     from vec_db.json_vec_db_test import easy_embedding
     return [{
         "embedding": easy_embedding(text)
-    } for text in texts], 0
+    } for text in texts], len(texts)
 
 
 def test_generate_trx_with_vector_db(mock_config, monkeypatch):
@@ -232,4 +236,23 @@ def test_clone_trx(mock_config):
         Expenses:Food:Restaurant
     """
     assert_txs_equal(trx, exp_trx)
-    
+
+
+def test_parse_args():
+    assert bean.parse_args("") == []
+    assert bean.parse_args("  ") == []
+    assert bean.parse_args("a b c") == ["a", "b", "c"]
+    assert bean.parse_args("a 'b c' d") == ["a", "b c", "d"]
+    assert bean.parse_args("a 'b\"' c") == ["a", "b\"", "c"]
+    assert bean.parse_args("a 'b' c d") == ["a", "b", "c", "d"]
+    assert bean.parse_args("a ”b“ c d") == ["a", "b", "c", "d"]
+    assert bean.parse_args("a “b    ”   c   d") == ["a", "b    ", "c", "d"]
+
+    with pytest.raises(ValueError):
+        bean.parse_args("a 'b")
+
+    with pytest.raises(ValueError):
+        bean.parse_args("a 'b c")
+
+    with pytest.raises(ValueError):
+        bean.parse_args("a “b c'")

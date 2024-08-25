@@ -68,7 +68,7 @@ After input, the bot will complete the transaction details and output them for u
 - [x] Clone transaction
 - [ ] Withdraw transaction
 - [x] Docker support
-- [ ] Unit tests
+- [x] Unit tests
 - [ ] Web-based Chat UI
 - [x] RAG (More precise element replacement through LLM, such as automatically changing "lunch" to "dinner", or automatically updating account changes, etc.)
 - [ ] Support incremental construction of vector databases (If using OpenAI's `text-embedding-3-large`, currently building a database consisting of 1000 transactions costs approximately $0.003, and most providers of embedding do not charge for the embedding function, so the priority is not high)

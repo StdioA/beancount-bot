@@ -31,4 +31,4 @@ jobs:
       run: |
         pip install pytest pytest-cov coverage
         coverage run -m pytest
-        coverage report
+        coverage report --include="**/*.py" --omit="**/*_test.py"

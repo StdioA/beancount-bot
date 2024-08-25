@@ -2786,7 +2786,7 @@ option "operating_currency" "USD"
 
 2024-06-12 * "Chichipotle" "Eating out with Julie"
   Liabilities:US:Chase:Slate                       -37.53 USD
-  Expenses:Food:Restaurant                          37.53 USD
+  Expenses:Food:Restaurant                          ; 37.53 USD ; Manually modified to test empty value
 
 2024-06-14 * "Kin Soy" "Eating out with Julie"
   Liabilities:US:Chase:Slate                       -19.95 USD

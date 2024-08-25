@@ -3,7 +3,6 @@ import yaml
 
 _ImmutableError = TypeError("This dictionary is immutable")
 
-
 class ImmutableDict(dict):
     def __setitem__(self, key, value):
         raise _ImmutableError
