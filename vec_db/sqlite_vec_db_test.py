@@ -35,6 +35,18 @@ def test_sqlite_db(tmp_path, mock_config, monkeypatch):
             "embedding": easy_embedding("another-3"),
         },
     ]
+    # Query without db built
+    candidates = sqlite_vec_db.query_by_embedding(
+        easy_embedding("content-1"), "sentence-1", 2,
+    )
+    assert len(candidates) == 0
+    # Query with empty table
+    sqlite_vec_db.build_db([])
+    candidates = sqlite_vec_db.query_by_embedding(
+        easy_embedding("content-1"), "sentence-1", 2,
+    )
+    assert len(candidates) == 0
+    # Build DB
     sqlite_vec_db.build_db(txs)
     db_path = sqlite_vec_db._get_db_name()
     assert db_path.exists()

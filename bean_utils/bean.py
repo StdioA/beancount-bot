@@ -90,7 +90,7 @@ class BeanManager:
         # Find the posting with missing units
         # If not found, return the first expense account
         for posting in target.postings:
-            if posting.units is MISSING:
+            if posting.units is MISSING or posting.meta.get("__automatic__"):
                 return posting.account
             elif posting.account.startswith("Expenses:") and expense_account is None:
                 expense_account = posting.account
@@ -252,3 +252,4 @@ bean_manager = None
 def init_bean_manager(fname=None):
     global bean_manager
     bean_manager = BeanManager(fname)
+    return bean_manager
