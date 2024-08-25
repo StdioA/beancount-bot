@@ -36,3 +36,8 @@ $(foreach lang,$(LANGUAGES),$(eval $(call po_rule,$(lang))))
 
 lint:
 	@ruff check
+
+test:
+	coverage run -m pytest
+	coverage report
+	@coverage html --include="**/*.py"

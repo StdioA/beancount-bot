@@ -42,9 +42,9 @@ def build_db(txs):
     if txs:
         embedding_dimention = len(txs[0]["embedding"])
 
-    # Drop table
-    db.execute("DROP TABLE vec_items")
-    db.execute("DROP TABLE transactions")
+    # Drop table if exists
+    db.execute("DROP TABLE IF EXISTS vec_items")
+    db.execute("DROP TABLE IF EXISTS transactions")
     db.commit()
     db.execute("VACUUM")
     db.commit()
@@ -71,13 +71,15 @@ def query_by_embedding(embedding, sentence, candidate_amount):
     db = get_db()
 
     try:
+        # I don't know why the implementation of `vec_distance_cosine` from sqlite-vec is `1 - cosine`
+        # Thus I should turn the result ranged from [0, 2] back to [1, -1]
         rows = db.execute(
             f"""
             SELECT
             rowid,
-            vec_distance_cosine(embedding, ?) AS distance
+            1-vec_distance_cosine(embedding, ?) AS distance
             FROM vec_items
-            ORDER BY distance LIMIT {candidate_amount}
+            ORDER BY distance DESC LIMIT {candidate_amount}
             """,
             (serialize_f32(embedding),)).fetchall()
     except sqlite3.OperationalError as e:

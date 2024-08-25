@@ -11,3 +11,8 @@ config = None
 def load_config(config_path):
     global config
     config = Config(config_path)
+
+
+def _load_config_from_dict(config_dict):
+    global config
+    config = Config.from_dict(config_dict)

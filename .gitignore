@@ -4,3 +4,5 @@ __pycache__
 tx_db.*
 config.yaml
 **/*.po~
+.coverage
+htmlcov
