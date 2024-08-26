@@ -42,7 +42,7 @@ def convert_account(account):
 def escape_quotes(s):
     if not s:
         return s
-    return s.replace('"', '\\"').replace("'", "\\'")
+    return s.replace('"', '\\"')
 
 
 def convert_to_natural_language(transaction) -> str:
@@ -57,45 +57,37 @@ def convert_to_natural_language(transaction) -> str:
     return sentence
 
 
-content_cache = {}
-
-
-def read_lines(fname, start, end):
-    global content_cache
-    if fname not in content_cache:
-        with open(fname) as f:
-            lines = f.readlines()
-        content_cache[fname] = lines
-    return content_cache[fname][start-1:end]
-
-
 def build_tx_db(transactions):
+    _content_cache = {}
+    def _read_lines(fname, start, end):
+        if fname not in _content_cache:
+            with open(fname) as f:
+                _content_cache[fname] = f.readlines()
+        return _content_cache[fname][start-1:end]
+
     unique_txs = {}
     amount = conf.config.embedding.transaction_amount
     # Build latest transactions
     for entry in reversed(transactions):
         if not isinstance(entry, Transaction):
             continue
-        try:
-            sentence = convert_to_natural_language(entry)
-            if sentence is None:
-                continue
-            if sentence in unique_txs:
-                unique_txs[sentence]["occurance"] += 1
-                continue
-            fname = entry.meta['filename']
-            start_lineno = entry.meta['lineno']
-            end_lineno = max(p.meta['lineno'] for p in entry.postings)
-            unique_txs[sentence] = {
-                "sentence": sentence,
-                "hash": hash_entry(entry),
-                "occurance": 1,
-                "content": "".join(read_lines(fname, start_lineno, end_lineno)),
-            }
-            if len(unique_txs) >= amount:
-                break
-        except Exception:
-            raise
+        sentence = convert_to_natural_language(entry)
+        if sentence is None:
+            continue
+        if sentence in unique_txs:
+            unique_txs[sentence]["occurance"] += 1
+            continue
+        fname = entry.meta['filename']
+        start_lineno = entry.meta['lineno']
+        end_lineno = max(p.meta['lineno'] for p in entry.postings)
+        unique_txs[sentence] = {
+            "sentence": sentence,
+            "hash": hash_entry(entry),
+            "occurance": 1,
+            "content": "".join(_read_lines(fname, start_lineno, end_lineno)),
+        }
+        if len(unique_txs) >= amount:
+            break
     # Build embedding by group
     total_usage = 0
     unique_txs_list = list(unique_txs.values())

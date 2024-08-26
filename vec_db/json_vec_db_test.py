@@ -50,6 +50,12 @@ def test_json_db(mock_config):
             "embedding": easy_embedding("another-3"),
         },
     ]
+    # Query when DB not exists
+    candidates = json_vec_db.query_by_embedding(
+        easy_embedding("content-1"), "sentence-1", 2,
+    )
+    assert candidates is None
+    # Build DB
     json_vec_db.build_db(txs)
     db_path = json_vec_db._get_db_name()
     assert db_path.exists()

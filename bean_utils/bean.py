@@ -12,7 +12,7 @@ from beancount.query import query
 from beancount.core.data import Open, Transaction
 from beancount.core.number import MISSING
 from typing import List
-from bean_utils.txs_query import query_txs
+from bean_utils.vec_query import query_txs
 from bean_utils.rag import complete_rag
 import conf
 

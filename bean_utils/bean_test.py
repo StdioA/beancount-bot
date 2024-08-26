@@ -4,7 +4,7 @@ import pytest
 from conf import _load_config_from_dict
 from conf.config_data import Config
 from beancount.parser import parser
-from bean_utils import bean, txs_query
+from bean_utils import bean, vec_query
 
 
 today = str(datetime.now().astimezone().date())
@@ -159,7 +159,6 @@ def test_generate_trx_with_vector_db(mock_config, monkeypatch):
         "candidates": 3,
         "output_amount": 2,
     }))
-    # monkeypatch.setattr(txs_query, "embedding", mock_embedding)
     def _mock_embedding_post(*args, json={}, **kwargs):
         result, tokens = mock_embedding(json["input"])
         return MockResponse({
@@ -169,7 +168,7 @@ def test_generate_trx_with_vector_db(mock_config, monkeypatch):
     monkeypatch.setattr(requests, "post", _mock_embedding_post)
 
     manager = bean.BeanManager(mock_config.beancount.filename)
-    txs_query.build_tx_db(manager.entries)
+    vec_query.build_tx_db(manager.entries)
     trx = manager.generate_trx('10.00 "Kin Soy", "Eating"')
     # The match effect is not garanteed in this test due to incorrect embedding implementation
     assert len(trx) == 2
@@ -202,13 +201,13 @@ def test_generate_trx_with_rag(mock_config, monkeypatch):
     monkeypatch.setattr(mock_config, "rag", Config.from_dict({
         "enable": True,
     }))
-    monkeypatch.setattr(txs_query, "embedding", mock_embedding)
+    monkeypatch.setattr(vec_query, "embedding", mock_embedding)
     monkeypatch.setattr(requests, "post", mock_post({"message": {"content": exp_trx}}))
 
     # Test RAG fallback
     manager = bean.BeanManager(mock_config.beancount.filename)
     trx = manager.generate_trx('10.00 "Kin Soy", "Eating"')
-    txs_query.build_tx_db(manager.entries)
+    vec_query.build_tx_db(manager.entries)
     # The match effect is not garanteed in this test due to incorrect embedding implementation
     assert len(trx) == 1
     assert_txs_equal(trx[0], exp_trx)

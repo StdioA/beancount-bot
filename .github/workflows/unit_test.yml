@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install "pip<24.1"
-        pip install -r requirements-full.txt
+        pip install -r requirements/full.txt
         pip install "sqlite-vec==0.1.1"
         pip install pytest pytest-cov coverage codecov
     - name: Test with pytest

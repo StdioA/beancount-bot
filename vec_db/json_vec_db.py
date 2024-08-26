@@ -23,7 +23,7 @@ def query_by_embedding(embedding, sentence, candidate_amount):
     try:
         with open(_get_db_name()) as f:
             transactions = json.load(f)
-    except FileExistsError:
+    except FileNotFoundError:
         logging.warning("JSON vector database is not built")
         return None
     embed_query = np.array(embedding)

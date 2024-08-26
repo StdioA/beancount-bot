@@ -4,7 +4,7 @@ from conf.i18n import gettext as _
 from typing import List, Union, Any
 from beancount.core.inventory import Inventory
 import requests
-from bean_utils import txs_query
+from bean_utils import vec_query
 from bean_utils.bean import bean_manager, NoTransactionError
 import conf
 
@@ -31,7 +31,7 @@ def build_db() -> BaseMessage:
     if not conf.config.embedding.get("enable", True):
         return BaseMessage(content=_("Embedding is not enabled."))
     entries = bean_manager.entries
-    tokens = txs_query.build_tx_db(entries)
+    tokens = vec_query.build_tx_db(entries)
     return BaseMessage(content=_("Token usage: {tokens}").format(tokens=tokens))
 
 

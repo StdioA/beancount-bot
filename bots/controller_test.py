@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, date
-from bean_utils import txs_query
+from bean_utils import vec_query
 from conf import _load_config_from_dict
 from bean_utils.bean import init_bean_manager
 from bots import controller
@@ -130,7 +130,7 @@ def test_build_db(monkeypatch, mock_env):
         "candidates": 3,
         "output_amount": 2,
     }))
-    monkeypatch.setattr(txs_query, "embedding", mock_embedding)
+    monkeypatch.setattr(vec_query, "embedding", mock_embedding)
     response = controller.build_db()
     assert isinstance(response, controller.BaseMessage)
     assert response.content == f"Token usage: {mock_env.embedding.transaction_amount}"
