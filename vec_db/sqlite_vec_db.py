@@ -1,5 +1,4 @@
 import pathlib
-import logging
 from operator import itemgetter
 import sqlite3
 import sqlite_vec
@@ -85,7 +84,7 @@ def query_by_embedding(embedding, sentence, candidate_amount):
     except sqlite3.OperationalError as e:
         # Handle exception when vec_db is not built
         if "no such table" in e.args[0]:
-            logging.warning("Sqlite vector database is not built")
+            conf.logger.warning("Sqlite vector database is not built")
             return []
         raise
     if not rows:

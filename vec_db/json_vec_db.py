@@ -1,6 +1,5 @@
 import pathlib
 import json
-import logging
 from operator import itemgetter
 import numpy as np
 from numpy.linalg import norm
@@ -24,7 +23,7 @@ def query_by_embedding(embedding, sentence, candidate_amount):
         with open(_get_db_name()) as f:
             transactions = json.load(f)
     except FileNotFoundError:
-        logging.warning("JSON vector database is not built")
+        conf.logger.warning("JSON vector database is not built")
         return None
     embed_query = np.array(embedding)
     # Calculate cosine similarity

@@ -1,4 +1,4 @@
-import logging
+import time
 import requests
 from beancount.loader import load_file
 from beancount.core.data import Transaction
@@ -100,7 +100,7 @@ def build_tx_db(transactions):
         total_usage += usage
 
     build_db(unique_txs_list)
-    logging.info("Total token usage: %d", total_usage)
+    conf.logger.info("Total token usage: %d", total_usage)
     return total_usage
 
 
@@ -117,4 +117,7 @@ def build_db_from_file():
     file_path = "main.bean"
     entries, errors, options = load_file(file_path)
     transactions = [e for e in entries if isinstance(e, Transaction)][-1000:]
-    logging.debug("Tokens:", build_tx_db(transactions))
+    start_time = time.time()
+    tokens = build_tx_db(transactions)
+    duration = time.time() - start_time
+    conf.logger.info("Tokens: %d, duration: %d", tokens, duration)

@@ -1,7 +1,6 @@
 # coding: utf-8
 import time
 from conf.i18n import gettext as _
-import logging
 from datetime import timedelta, datetime
 import telegram
 from telegram import Update
@@ -137,10 +136,10 @@ async def callback(update, context):
     if choice == "submit":
         result_msg = _("Submitted ✅")
         bean_manager.commit_trx(trx)
-        logging.info("Commit transaction: %s\n", trx)
+        conf.logger.info("Commit transaction: %s\n", trx)
     else:
         result_msg = _("Cancelled ❌")
-        logging.info("Cancel transaction")
+        conf.logger.info("Cancel transaction")
 
     if result_msg:
         await query.edit_message_text(text=f"{trx}\n\n{result_msg}")
@@ -183,5 +182,5 @@ def run_bot():
     for handler in handlers:
         application.add_handler(handler)
 
-    logging.info("Bot start")
+    conf.logger.info("Beancount bot start")
     application.run_polling(allowed_updates=Update.ALL_TYPES)

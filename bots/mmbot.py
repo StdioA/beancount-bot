@@ -95,8 +95,10 @@ class BeanBotPlugin(Plugin):
         if webhook_id == "submit":
             reaction = "white_check_mark"
             bean_manager.commit_trx(trx.strip())
+            conf.logger.info("Commit transaction: %s\n", trx)
         else:
             reaction = "wastebasket"
+            conf.logger.info("Cancel transaction")
 
         self.driver.respond_to_web(event, {
             "update": {
@@ -166,4 +168,5 @@ def run_bot():
         ),  # Either specify your settings here or as environment variables.
         plugins=[BeanBotPlugin()],  # Add your own plugins here.
     )
+    conf.logger.info("Beancount bot start")
     bot.run()

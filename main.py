@@ -1,14 +1,20 @@
 import argparse
 import conf
-import logging
 from bean_utils import bean
 
 
-def main():
+def init_bot(config_path):
+    conf.load_config(config_path)
+    # Init i18n
+    conf.init_locale()
     # Init logging
-    logging.basicConfig(level=logging.INFO)
-    # logging.getLogger().addHandler(logging.StreamHandler())
+    conf.init_logging()
+    # Init beancount manager
+    bean.init_bean_manager()
 
+
+
+def main():
     parser = argparse.ArgumentParser(prog='beanbot',
                                      description='Bot to translate text into beancount transaction')
     subparser = parser.add_subparsers(title='sub command', dest='command')
@@ -22,11 +28,7 @@ def main():
     if args.command is None:
         parser.print_help()
         return 
-
-    conf.load_config(args.c)
-    # Init i18n
-    conf.init_locale()
-    bean.init_bean_manager()
+    init_bot(args.c)
 
     if args.command == "telegram":
         from bots.telegram_bot import run_bot

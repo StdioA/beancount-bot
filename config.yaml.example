@@ -35,3 +35,21 @@ rag:
   api_url: "https://api.deepseek.com/v1/chat/completions"  # OpenAI compatible API endpoint
   api_key: "{your_key_here}"
   model: "deepseek-chat"
+
+# Logging config, you can specify any key to override the default config (e.g. level only)
+# See https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+logging:
+  formatters:
+    standard:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: WARNING
+      formatter: standard
+      stream: ext://sys.stdout
+  loggers:
+    beanbot:
+      level: WARNING
+      handlers: [console]
+      propagate: no
