@@ -1,8 +1,7 @@
 from datetime import datetime
 import requests
 import pytest
-from conf import _load_config_from_dict
-from conf.config_data import Config
+from conf.conf_test import load_config_from_dict, clear_config
 from beancount.parser import parser
 from bean_utils import bean, vec_query
 
@@ -36,8 +35,9 @@ def mock_config(tmp_path):
             "account_distinguation_range": [2, 3],
         }
     }
-    config = _load_config_from_dict(conf_data)
-    return config
+    config = load_config_from_dict(conf_data)
+    yield config
+    clear_config()
 
 
 def test_load(mock_config):
@@ -119,9 +119,9 @@ def test_build_txs(mock_config):
     assert_txs_equal(trx, exp_trx)
 
     # Text account not found
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Account .+ not found"):
         manager.build_trx(["10.00", "ICBC:Checking", "NotFound", "McDonalds", "Big Mac"])
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Account .+ not found"):
         manager.build_trx(["10.00", "BofA:Checking", "McDonalds", "Big Mac"])
 
 
@@ -140,7 +140,7 @@ def test_generate_trx(mock_config):
     """
     assert_txs_equal(trxs[0], exp_trx)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Account .+ not found"):
         manager.generate_trx("10.00 ICBC:Checking NotFound McDonalds 'Big Mac'")
 
 
@@ -153,13 +153,13 @@ def mock_embedding(texts):
 
 def test_generate_trx_with_vector_db(mock_config, monkeypatch):
     # Test vector DB fallback
-    monkeypatch.setattr(mock_config, "embedding", Config.from_dict({
+    mock_config["embedding"] = {
         "enable": True,
         "transaction_amount": 100,
         "candidates": 3,
         "output_amount": 2,
-    }))
-    def _mock_embedding_post(*args, json={}, **kwargs):
+    }
+    def _mock_embedding_post(*args, json, **kwargs):
         result, tokens = mock_embedding(json["input"])
         return MockResponse({
             "data": result,
@@ -192,15 +192,17 @@ def test_generate_trx_with_rag(mock_config, monkeypatch):
         Assets:US:BofA:Checking  -23.40 USD
         Expenses:Food:Restaurant
     """
-    monkeypatch.setattr(mock_config, "embedding", Config.from_dict({
-        "enable": True,
-        "transaction_amount": 100,
-        "candidates": 3,
-        "output_amount": 2,
-    }))
-    monkeypatch.setattr(mock_config, "rag", Config.from_dict({
-        "enable": True,
-    }))
+    mock_config.update({
+        "embedding": {
+            "enable": True,
+            "transaction_amount": 100,
+            "candidates": 3,
+            "output_amount": 2,
+        },
+        "rag": {
+            "enable": True
+            }
+        })
     monkeypatch.setattr(vec_query, "embedding", mock_embedding)
     monkeypatch.setattr(requests, "post", mock_post({"message": {"content": exp_trx}}))
 
@@ -247,11 +249,11 @@ def test_parse_args():
     assert bean.parse_args("a ”b“ c d") == ["a", "b", "c", "d"]
     assert bean.parse_args("a “b    ”   c   d") == ["a", "b    ", "c", "d"]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=bean.ArgsError.args[0]):
         bean.parse_args("a 'b")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=bean.ArgsError.args[0]):
         bean.parse_args("a 'b c")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=bean.ArgsError.args[0]):
         bean.parse_args("a “b c'")

@@ -1,6 +1,6 @@
 import pytest
 from typing import List
-from conf import _load_config_from_dict, config
+from conf.conf_test import load_config_from_dict, clear_config
 from vec_db import json_vec_db
 
 
@@ -12,8 +12,9 @@ def mock_config(tmp_path):
             "db_store_folder": tmp_path,
         }
     }
-    _load_config_from_dict(conf_data)
-    return config
+    config = load_config_from_dict(conf_data)
+    yield config
+    clear_config()
 
 
 def easy_embedding(content: str) -> List[float]:

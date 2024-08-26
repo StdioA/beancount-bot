@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, date
 from bean_utils import vec_query
-from conf import _load_config_from_dict
+from conf.conf_test import load_config_from_dict, clear_config
 from bean_utils.bean import init_bean_manager
 from bots import controller
 from bean_utils.bean_test import assert_txs_equal, mock_embedding
@@ -25,13 +25,14 @@ def mock_env(tmp_path, monkeypatch):
             "account_distinguation_range": [2, 3],
         }
     }
-    config = _load_config_from_dict(conf_data)
+    config = load_config_from_dict(conf_data)
     manager = init_bean_manager()
     monkeypatch.setattr(controller, "bean_manager", manager)
-    return config
+    yield config
+    clear_config()
 
 
-def test_fetch_expense(monkeypatch, mock_env):
+def test_fetch_expense(mock_env):
     # Start and end is the same
     start, end = date(2023, 6, 29), date(2023, 6, 30)
     resp_table = controller.fetch_expense(start, end)
@@ -52,7 +53,7 @@ def test_fetch_expense(monkeypatch, mock_env):
     ]
 
 
-def test_fetch_bill(monkeypatch, mock_env):
+def test_fetch_bill(mock_env):
         # Start and end is the same
     start, end = date(2023, 6, 29), date(2023, 6, 30)
     resp_table = controller.fetch_bill(start, end)
@@ -77,7 +78,7 @@ def test_fetch_bill(monkeypatch, mock_env):
     ]
 
 
-def test_clone_txs(monkeypatch, mock_env):
+def test_clone_txs(mock_env):
     # Normal generation
     param = """
     2023-05-23 * "Kin Soy" "Eating" #tag1 #tag2
@@ -99,7 +100,7 @@ def test_clone_txs(monkeypatch, mock_env):
     assert response.content == "No transaction found"
 
 
-def test_render_txs(monkeypatch, mock_env):
+def test_render_txs(mock_env):
     # Normal generation
     responses = controller.render_txs('23.4 BofA:Checking "Kin Soy" Eating #tag1 #tag2')
     assert len(responses) == 1

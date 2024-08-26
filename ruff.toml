@@ -27,7 +27,6 @@ exclude = [
     "site-packages",
     "venv",
     "test.py",
-    "*_test.py",
 ]
 
 # Same as Black.
@@ -49,6 +48,20 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.extend-per-file-ignores]
+"**/*_test.py" = [
+    # at least this three should be fine in tests:
+    "S101", # asserts allowed in tests...
+    "ARG", # Unused function args -> fixtures nevertheless are functionally relevant...
+    "FBT", # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+    "SLF001", # Private member accessed
+    "F811", # Re-use of pytest fixture will cause redefinition of unused variable
+    "F401", # Import but unused on pytest fixture
+    # The below are debateable
+    "PLR2004", # Magic value used in comparison, ...
+    "S311", # Standard pseudo-random generators are not suitable for cryptographic purposes
+]
 
 [format]
 # Like Black, use double quotes for strings.

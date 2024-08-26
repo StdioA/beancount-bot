@@ -1,6 +1,6 @@
 import pytest
 from bean_utils import vec_query
-from conf import _load_config_from_dict
+from conf.conf_test import load_config_from_dict, clear_config
 from conf.config_data import Config
 from beancount.parser import parser
 from bean_utils.bean import parse_args
@@ -13,12 +13,13 @@ def mock_config():
             "account_distinguation_range": [1, 2],
         },
     }
-    config = _load_config_from_dict(conf_data)
-    return config
+    config = load_config_from_dict(conf_data)
+    yield config
+    clear_config()
 
 
 @pytest.mark.parametrize(
-    "account, arg, exp",
+    ("account", "arg", "exp"),
     [
         ("Assets:BoFA:Checking", 1, "BoFA"),
         ("Assets:BoFA:Checking", [1, 1], "BoFA"),
@@ -27,21 +28,21 @@ def mock_config():
     ],
 )
 def test_convert_account(account, arg, exp, mock_config, monkeypatch):
-    monkeypatch.setattr(vec_query.conf.config, "beancount", Config.from_dict({
+    mock_config["beancount"] = {
         "account_distinguation_range": arg,
-    }))
+    }
     assert vec_query.convert_account(account) == exp
 
 
-def test_convert_to_natual_language(monkeypatch):
+def test_convert_to_natual_language(monkeypatch, mock_config):
     trx_str = """
     2022-01-01 * "Discount 'abc'" "Discount"
       Assets:US:BofA:Checking                         4264.93 USD
       Equity:Opening-Balances                        -4264.93 USD
     """
-    monkeypatch.setattr(vec_query.conf.config, "beancount", Config.from_dict({
+    mock_config["beancount"] = {
         "account_distinguation_range": [1, 2],
-    }))
+    }
     trx, _, _ = parser.parse_string(trx_str)
 
     result = vec_query.convert_to_natural_language(trx[0])

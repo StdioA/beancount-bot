@@ -41,10 +41,10 @@ class Config:
         if key in self._config:
             value = self._config[key]
             if isinstance(value, dict):
-                return Config.from_dict(value)
+                return self.__class__.from_dict(value)
             return value
         # raise AttributeError(f"Config has no attribute '{key}'")
-        return Config.from_dict({})
+        return self.__class__.from_dict({})
 
     @classmethod
     def from_dict(cls, dictionary):

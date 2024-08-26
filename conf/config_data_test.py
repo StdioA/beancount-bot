@@ -4,7 +4,7 @@ from conf.config_data import Config, ImmutableDict
 
 
 @pytest.mark.parametrize(
-    "method, args, kwargs",
+    ("method", "args", "kwargs"),
     [
         ("__setitem__", ["key", "value"], {}),
         ("__delitem__", ["key"], {}),
