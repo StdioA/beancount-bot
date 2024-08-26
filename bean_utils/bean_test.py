@@ -1,4 +1,6 @@
 from datetime import datetime
+import shutil
+from pathlib import Path
 import requests
 import pytest
 from conf.conf_test import load_config_from_dict, clear_config
@@ -69,16 +71,26 @@ def test_account_search(mock_config):
 
 
 def assert_txs_equal(tx1_str, tx2_str):
-    tx1 = parser.parse_string(tx1_str)[0][0]
-    tx2 = parser.parse_string(tx2_str)[0][0]
+    if isinstance(tx1_str, str):
+        tx1 = parser.parse_string(tx1_str)[0][0]
+    else:
+        tx1 = tx1_str
+    if isinstance(tx2_str, str):
+        tx2 = parser.parse_string(tx2_str)[0][0]
+    else:
+        tx2 = tx2_str
     
-    def clean_lineno(tx):
-        tx.meta["lineno"] = 0
+    def clean_meta(tx):
+        keys = list(tx.meta.keys())
+        for key in keys:
+            del tx.meta[key]
         for p in tx.postings:
-            p.meta["lineno"] = 0
+            keys = list(p.meta.keys())
+            for key in keys:
+                del p.meta[key]
         return tx
 
-    assert clean_lineno(tx1) == clean_lineno(tx2)
+    assert clean_meta(tx1) == clean_meta(tx2)
 
 
 def test_build_txs(mock_config):
@@ -257,3 +269,40 @@ def test_parse_args():
 
     with pytest.raises(ValueError, match=bean.ArgsError.args[0]):
         bean.parse_args("a “b c'")
+
+
+@pytest.fixture
+def copied_bean(tmp_path):
+    new_bean = tmp_path / "example.bean"
+    shutil.copyfile("testdata/example.bean", new_bean)
+    yield new_bean
+    Path(new_bean).unlink()
+
+
+def test_manager_reload(mock_config, copied_bean):
+    manager = bean.BeanManager(copied_bean)
+    account_amount = len(manager.accounts)
+    entry_amount = len(manager.entries)
+    assert len(manager.accounts) == 63
+    assert len(manager.entries) == 2037
+
+    # Append a "close" entry
+    with open(copied_bean, "a") as f:
+        f.write(f"{today} close Assets:US:BofA:Checking\n")
+    
+    # The account amount should reloaded
+    assert len(manager.accounts) == account_amount - 1
+    assert len(manager.entries) == entry_amount + 1
+
+
+def test_manager_commmit(mock_config, copied_bean):
+    manager = bean.BeanManager(copied_bean)
+    assert len(manager.entries) == 2037
+    txs = f"""
+    {today} * "Test Payee" "Test Narration"
+        Liabilities:US:Chase:Slate                       -12.30 USD
+        Expenses:Food:Restaurant                          12.30 USD
+    """
+    manager.commit_trx(txs)
+    assert len(manager.entries) == 2038
+    assert_txs_equal(manager.entries[-1], txs)

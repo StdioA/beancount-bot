@@ -9,7 +9,7 @@ import subprocess
 from beancount import loader
 from beancount.parser import parser
 from beancount.query import query
-from beancount.core.data import Open, Transaction
+from beancount.core.data import Open, Close, Transaction
 from beancount.core.number import MISSING
 from typing import List
 from bean_utils.vec_query import query_txs
@@ -35,11 +35,16 @@ class BeanManager:
 
     def _load(self):
         self._entries, errors, self._options = loader.load_file(self.fname)
-        self._accounts = []
+        self._accounts = set()
         self.mtimes = {}
+        self.account_files = set()
         for ent in self._entries:
             if isinstance(ent, Open):
-                self._accounts.append(ent.account)
+                self._accounts.add(ent.account)
+                self.account_files.add(ent.meta["filename"])
+            elif isinstance(ent, Close):
+                self._accounts.remove(ent.account)
+                self.account_files.add(ent.meta["filename"])
 
         # Fill mtime
         for f in self._options["include"]:
@@ -47,10 +52,11 @@ class BeanManager:
 
     def _auto_reload(self, accounts_only=False):
         # Check and reload
-        for f, mtime in self.mtimes.items():
-            if accounts_only and ("accounts" not in f):
-                continue
-            if mtime != Path(f).stat().st_mtime:
+        files_to_check = self.mtimes.keys()
+        if accounts_only:
+            files_to_check = self.account_files
+        for fname in files_to_check:
+            if self.mtimes[fname] != Path(fname).stat().st_mtime:
                 self._load()
                 return
 
@@ -199,7 +205,7 @@ class BeanManager:
         fname = self.fname
         with open(fname, 'a') as f:
             f.write("\n" + data + "\n")
-        subprocess.run(["bean-format", "-o", shlex.quote(fname), shlex.quote(fname)],   # noqa: S607,S603
+        subprocess.run(["bean-format", "-o", shlex.quote(str(fname)), shlex.quote(str(fname))],   # noqa: S607,S603
                        shell=False)
 
 
