@@ -1,6 +1,4 @@
-import time
 import requests
-from beancount.loader import load_file
 from beancount.core.data import Transaction
 from beancount.core.compare import hash_entry
 import conf
@@ -111,13 +109,3 @@ def query_txs(query):
     if match:
         return match[:output_amount]
     return []
-
-
-def build_db_from_file():
-    file_path = "main.bean"
-    entries, errors, options = load_file(file_path)
-    transactions = [e for e in entries if isinstance(e, Transaction)][-1000:]
-    start_time = time.time()
-    tokens = build_tx_db(transactions)
-    duration = time.time() - start_time
-    conf.logger.info("Tokens: %d, duration: %d", tokens, duration)

@@ -6,7 +6,6 @@ from bean_utils.bean import init_bean_manager
 from bots import controller
 from bean_utils.bean_test import assert_txs_equal, mock_embedding
 from conf.config_data import Config
-from conf.i18n import gettext as _
 
 
 today = str(datetime.now().astimezone().date())
@@ -36,8 +35,8 @@ def test_fetch_expense(mock_env):
     # Start and end is the same
     start, end = date(2023, 6, 29), date(2023, 6, 30)
     resp_table = controller.fetch_expense(start, end)
-    assert resp_table.title == _("Expenditures on 2023-06-29")
-    assert resp_table.headers == [_("Account"), _("Position")]
+    assert resp_table.title == "Expenditures on 2023-06-29"
+    assert resp_table.headers == ["Account", "Position"]
     assert resp_table.rows == [
         ["Expenses:Food", "31.59 USD"],
     ]
@@ -46,8 +45,8 @@ def test_fetch_expense(mock_env):
     # Test level
     start, end = date(2023, 6, 1), date(2023, 7, 1)
     resp_table = controller.fetch_expense(start, end, root_level=1)
-    assert resp_table.title == _("Expenditures between 2023-06-01 - 2023-07-01")
-    assert resp_table.headers == [_("Account"), _("Position")]
+    assert resp_table.title == "Expenditures between 2023-06-01 - 2023-07-01"
+    assert resp_table.headers == ["Account", "Position"]
     assert resp_table.rows == [
         ["Expenses", "7207.08 USD, 2400.00 IRAUSD"],
     ]
@@ -57,8 +56,8 @@ def test_fetch_bill(mock_env):
         # Start and end is the same
     start, end = date(2023, 6, 29), date(2023, 6, 30)
     resp_table = controller.fetch_bill(start, end)
-    assert resp_table.title == _("Account changes on 2023-06-29")
-    assert resp_table.headers == [_("Account"), _("Position")]
+    assert resp_table.title == "Account changes on 2023-06-29"
+    assert resp_table.headers == ["Account", "Position"]
     assert resp_table.rows == [
         ["Expenses:Food", "31.59 USD"],
         ["Liabilities:US", "-31.59 USD"],
@@ -68,8 +67,8 @@ def test_fetch_bill(mock_env):
     # Test level
     start, end = date(2023, 6, 1), date(2023, 7, 1)
     resp_table = controller.fetch_bill(start, end, root_level=1)
-    assert resp_table.title == _("Account changes between 2023-06-01 - 2023-07-01")
-    assert resp_table.headers == [_("Account"), _("Position")]
+    assert resp_table.title == "Account changes between 2023-06-01 - 2023-07-01"
+    assert resp_table.headers == ["Account", "Position"]
     assert resp_table.rows == [
         ['Assets', '3210.66768 USD, 10 VACHR, -2400.00 IRAUSD'],
         ['Expenses', '7207.08 USD, 2400.00 IRAUSD'],
@@ -122,7 +121,7 @@ def test_build_db(monkeypatch, mock_env):
     # Build db without embedding enabled
     response = controller.build_db()
     assert isinstance(response, controller.BaseMessage)
-    assert response.content == _("Embedding is not enabled.")
+    assert response.content == "Embedding is not enabled."
 
     # Build db with embedding enabled
     monkeypatch.setattr(mock_env, "embedding", Config.from_dict({

@@ -33,14 +33,14 @@ exclude = [
 line-length = 120
 indent-width = 4
 
-# Assume Python 3.8
+# Assume Python 3.9
 target-version = "py39"
 
 [lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 select = ["E4", "E7", "E9", "F", "DJ",
           "YTT", "ASYNC", "ASYNC", "S", "BLE", "B", "A", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "ISC", "ICN", "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "PTH", "TD", "FIX"]
-ignore = ["RET505", "SIM108", "PTH123", "S608"]
+ignore = ["S608", "PTH123", "SIM108"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]

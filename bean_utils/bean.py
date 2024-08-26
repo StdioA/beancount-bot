@@ -92,7 +92,7 @@ class BeanManager:
         for posting in target.postings:
             if posting.units is MISSING or posting.meta.get("__automatic__"):
                 return posting.account
-            elif posting.account.startswith("Expenses:") and expense_account is None:
+            if posting.account.startswith("Expenses:") and expense_account is None:
                 expense_account = posting.account
         return expense_account
 

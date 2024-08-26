@@ -2,7 +2,7 @@ import pytest
 from vec_db.json_vec_db_test import easy_embedding, mock_config
 
 try:
-    import sqlite_vec as _
+    import sqlite_vec
 except ImportError:
     pytest.skip("skipping module tests due to sqlite_vec not installed", allow_module_level=True)
 else:
