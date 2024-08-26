@@ -7,7 +7,7 @@ COPY requirements/full.txt requirements/optional.txt /app/
 RUN mkdir -p $VIRTUAL_ENV && uv venv $VIRTUAL_ENV && \
     uv pip install --no-cache-dir -r full.txt && \
     (uv pip install --no-cache-dir -r optional.txt || true)
-COPY . /app
+ADD . /app
 
 VOLUME /data/ledger
 WORKDIR /data/ledger
