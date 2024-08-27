@@ -13,27 +13,27 @@ def init_bot(config_path):
     bean.init_bean_manager()
 
 
-
-def main():
+def parse_args():
     parser = argparse.ArgumentParser(prog='beanbot',
                                      description='Bot to translate text into beancount transaction')
-    subparser = parser.add_subparsers(title='sub command', dest='command')
+    subparser = parser.add_subparsers(title='sub command', required=True, dest='command')
 
     telegram_parser = subparser.add_parser("telegram")
     telegram_parser.add_argument('-c', nargs="?", type=str, default="config.yaml", help="config file path")
     mattermost_parser = subparser.add_parser("mattermost")
     mattermost_parser.add_argument('-c', nargs="?", type=str, default="config.yaml", help="config file path")
 
-    args = parser.parse_args()
-    if args.command is None:
-        parser.print_help()
-        return 
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
     init_bot(args.c)
 
     if args.command == "telegram":
         from bots.telegram_bot import run_bot
     elif args.command == "mattermost":
-        from bots.mmbot import run_bot
+        from bots.mattermost_bot import run_bot
     run_bot()
 
 

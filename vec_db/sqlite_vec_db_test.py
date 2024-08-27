@@ -9,7 +9,7 @@ else:
     from vec_db import sqlite_vec_db
 
 
-def test_sqlite_db(tmp_path, mock_config, monkeypatch):
+def test_sqlite_db(tmp_path, mock_config, monkeypatch):    
     monkeypatch.setattr(sqlite_vec_db, "_db", None)
     # Build DB
     txs = [

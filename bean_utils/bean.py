@@ -34,6 +34,22 @@ class BeanManager:
         self._load()
 
     def _load(self):
+        """
+        Load the beancount file and initialize the internal state.
+
+        This function loads the beancount file specified by `self.fname` and
+        initializes the internal state. The internal state includes the entries
+        (transactions and metadata), options, accounts, modification times of
+        included files, and account files.
+
+        This function does not return anything. It updates the following instance
+        variables:
+        - `_entries`: a list of parsed entries.
+        - `_options`: a dictionary of options.
+        - `_accounts`: a set of accounts.
+        - `mtimes`: a dictionary mapping filenames to modification times.
+        - `account_files`: a set of filenames.
+        """
         self._entries, errors, self._options = loader.load_file(self.fname)
         self._accounts = set()
         self.mtimes = {}
@@ -51,7 +67,13 @@ class BeanManager:
             self.mtimes[f] = Path(f).stat().st_mtime
 
     def _auto_reload(self, accounts_only=False):
-        # Check and reload
+        """
+        Check and reload if any of the files have been modified.
+
+        Args:
+            accounts_only (bool): If True, only check the files that contains account
+                transactions. Defaults to False.
+        """
         files_to_check = self.mtimes.keys()
         if accounts_only:
             files_to_check = self.account_files
@@ -76,13 +98,34 @@ class BeanManager:
         return self._accounts
 
     def find_account(self, account_str):
+        """
+        Find an account that contains the given string.
+
+        Args:
+            account_str (str): A substring to search for in the account string.
+
+        Returns:
+            str or None: The account that contains the given substring, or None
+                if no such account is found.
+        """
         for account in self.accounts:
             if account_str in account:
                 return account
         return None
 
     def find_account_by_payee(self, payee):
-        # Find the account with the same payee
+        """
+        Find the account with the same payee.
+
+        Args:
+            payee (str): The payee to search for.
+
+        Returns:
+            str or None: The account with the same payee, or None if not found. If the
+                transaction has multiple postings with missing units, the first one is
+                returned. If no expense account is found, the first expense account in
+                the transaction is returned.
+        """
         target = None
         for trx in reversed(self._entries):
             if not isinstance(trx, Transaction):
@@ -103,9 +146,27 @@ class BeanManager:
         return expense_account
 
     def run_query(self, q):
+        """
+        A procedural interface to the `beancount.query` module.
+        """
         return query.run_query(self.entries, self.options, q)
 
-    def match_new_args(self, args) -> List[List[str]]:
+    def modify_args_via_vec(self, args) -> List[List[str]]:
+        """
+        Given a list of arguments, modify the arguments to match the transactions in the vector
+        database.
+
+        Args:
+            args (List[str]): The arguments to modify.
+
+        Returns:
+            List[List[str]]: A list of modified arguments.
+
+        This function queries the vector database to find transactions that match the given
+        arguments. It then rebuilds the narrations for each matching transaction and returns a
+        list of modified arguments. If no matching transactions are found, an empty list is
+        returned.
+        """
         # Query from vector db
         matched_txs = query_txs(" ".join(args[1:]))
         candidate_args = []
@@ -120,6 +181,20 @@ class BeanManager:
         return candidate_args
 
     def build_trx(self, args):
+        """
+        The core function of transaction generation.
+
+        Args:
+            args (List[str]): A list of strings representing the transaction arguments.
+                The format is: {amount} {from_account} {to_account} {payee} {narration} [#{tag1} #{tag2} ...].
+                The to_account and narration are optional.
+
+        Returns:
+            str: The transaction string in the beancount format.
+
+        Raises:
+            ValueError: If from_account or to_account is not found.
+        """
         amount, from_acc, to_acc, *extra = args
 
         amount = Decimal(amount)
@@ -127,9 +202,11 @@ class BeanManager:
         to_account = self.find_account(to_acc)
         payee = None
 
+        # from_account id requied
         if from_account is None:
             err_msg = _("Account {acc} not found").format(acc=from_acc)
             raise ValueError(err_msg)
+        # Try to find the payee if to_account is not found
         if to_account is None:
             payee = to_acc
             to_account = self.find_account_by_payee(payee)
@@ -139,7 +216,7 @@ class BeanManager:
 
         if payee is None:
             payee, *extra = extra
-        kwargs = {
+        trx_info = {
             "date": datetime.now().astimezone().date(),
             "payee": payee,
             "from_account": from_account,
@@ -154,14 +231,30 @@ class BeanManager:
         for arg in extra:
             if arg.startswith(("#", "^")):
                 tags.append(arg)
-            elif not kwargs["desc"]:
-                kwargs["desc"] = arg
+            elif not trx_info["desc"]:
+                trx_info["desc"] = arg
         if tags:
-            kwargs["tags"] = " " + " ".join(tags)
+            trx_info["tags"] = " " + " ".join(tags)
 
-        return transaction_tmpl.format(**kwargs)
+        return transaction_tmpl.format(**trx_info)
 
     def generate_trx(self, line) -> List[str]:
+        """
+        The entry procedure for transaction generation.
+
+        If the line cannot be directly converted into a transaction,
+        the function will attempt to match it from a vector database
+        or a RAG model. If all attempts fail, a ValueError will be raised.
+
+        Args:
+            line (str): The line to generate a transaction from.
+
+        Returns:
+            List[str]: A list of transactions generated from the line.
+
+        Raises:
+            ValueError: If all attempts to generate a transaction fail.
+        """
         args = parse_args(line)
         try:
             return [self.build_trx(args)]
@@ -177,7 +270,7 @@ class BeanManager:
             if vec_enabled:
                 # Query from vector db
                 candidate_txs = []
-                for new_args in self.match_new_args(args):
+                for new_args in self.modify_args_via_vec(args):
                     with contextlib.suppress(ValueError):
                         candidate_txs.append(self.build_trx(new_args))
                 if candidate_txs:
@@ -187,6 +280,15 @@ class BeanManager:
             raise e
 
     def clone_trx(self, text) -> str:
+        """
+        Clone a transaction from text.
+
+        Args:
+            text (str): Text contains one transaction.
+
+        Returns:
+            str: A transaction with today's date.
+        """
         entries, _, _ = parser.parse_string(text)
         try:
             txs = next(e for e in entries if isinstance(e, Transaction))
@@ -202,6 +304,15 @@ class BeanManager:
         return "\n".join(segments)
 
     def commit_trx(self, data):
+        """
+        Commit a transaction to beancount file, and format.
+
+        Args:
+            data (str): The transaction data in beancount format.
+
+        Raises:
+            SubprocessError: If the bean-format command fails to execute.
+        """
         fname = self.fname
         with open(fname, 'a') as f:
             f.write("\n" + data + "\n")

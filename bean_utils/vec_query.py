@@ -26,6 +26,20 @@ def embedding(texts):
 
 
 def convert_account(account):
+    """
+    Convert an account string to a specific segment.
+
+    Args:
+        account (str): The account string to convert.
+
+    Returns:
+        str: The converted account string.
+
+    This function takes an account string and converts it to a specific segment
+    based on the configuration in conf.config.beancount.account_distinguation_range.
+    If the account string does not contain any segment, the original account string
+    is returned.
+    """
     dist_range = conf.config.beancount.account_distinguation_range
     segments = account.split(":")
     if isinstance(dist_range, int):
@@ -44,7 +58,22 @@ def escape_quotes(s):
 
 
 def convert_to_natural_language(transaction) -> str:
-    # date = transaction.date.strftime('%Y-%m-%d')
+    """
+    Convert a transaction object to a string representation of natural language for input to RAG.
+
+    Args:
+        transactions (Transation): A Transaction object.
+
+    Returns:
+        str: The natural language representation of the transaction.
+
+    The format of the representation is:
+    `"{payee}" "{description}" "{account1} {account2} ..." [{#tag1} {#tag2} ...]`,
+    where `{payee}` is the payee of the transaction, `{description}` is the narration,
+    and `{account1} {account2} ...` is a space-separated list of accounts in the transaction.
+    The accounts are converted to the most distinguable level as specified in the configuration.
+    If the transaction has tags, they are appended to the end of the sentence.
+    """
     payee = f'"{escape_quotes(transaction.payee)}"'
     description = f'"{escape_quotes(transaction.narration)}"'
     accounts = " ".join([convert_account(posting.account) for posting in transaction.postings])
@@ -56,6 +85,18 @@ def convert_to_natural_language(transaction) -> str:
 
 
 def build_tx_db(transactions):
+    """
+    Build a transaction database from the given transactions. This function
+    consolidates the latest transactions and calculates their embeddings.
+    The embeddings are stored in a database for future use.
+
+    Args:
+        transactions (list): A list of Transaction objects representing the
+        transactions.
+
+    Returns:
+        int: The total number of tokens used for embedding.
+    """
     _content_cache = {}
     def _read_lines(fname, start, end):
         if fname not in _content_cache:
@@ -103,6 +144,16 @@ def build_tx_db(transactions):
 
 
 def query_txs(query):
+    """
+    Query transactions based on the given query string.
+
+    Args:
+        query (str): The query string to search for.
+
+    Returns:
+        list: A list of matched transactions. The length of the list is determined
+            by the `output_amount` configuration.
+    """
     candidates = conf.config.embedding.candidates or 3
     output_amount = conf.config.embedding.output_amount or 1
     match = query_by_embedding(embedding([query])[0][0]["embedding"], query, candidates)
