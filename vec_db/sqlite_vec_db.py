@@ -70,15 +70,14 @@ def query_by_embedding(embedding, sentence, candidate_amount):
     db = get_db()
 
     try:
-        # I don't know why the implementation of `vec_distance_cosine` from sqlite-vec is `1 - cosine`
-        # Thus I should turn the result ranged from [0, 2] back to [1, -1]
+        # 1 - vec_distance_cosine(embedding, ?) is cosine similarity
         rows = db.execute(
             f"""
             SELECT
             rowid,
-            1-vec_distance_cosine(embedding, ?) AS distance
+            1-vec_distance_cosine(embedding, ?) AS similarity
             FROM vec_items
-            ORDER BY distance DESC LIMIT {candidate_amount}
+            ORDER BY similarity DESC LIMIT {candidate_amount}
             """,
             (serialize_f32(embedding),)).fetchall()
     except sqlite3.OperationalError as e:
