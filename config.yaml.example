@@ -19,6 +19,10 @@ bot:
     webhook_host_port: 8308
     webhook_host_url: "{webhook_host}"
     owner_user: "{chat_owner}"
+  web:
+    chat_db: "chat_db.sqlite"
+    host: "0.0.0.0"
+    port: 8000
 
 embedding:
   enable: true                            # Disable it if you care about privacy

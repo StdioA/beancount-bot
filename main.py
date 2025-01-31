@@ -14,14 +14,19 @@ def init_bot(config_path):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog='beanbot',
-                                     description='Bot to translate text into beancount transaction')
-    subparser = parser.add_subparsers(title='sub command', required=True, dest='command')
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        prog="beanbot",
+        description="Bot to translate text into beancount transaction",
+    )
+    subparsers = parser.add_subparsers(title="sub command", required=True, dest="command")
 
-    telegram_parser = subparser.add_parser("telegram")
-    telegram_parser.add_argument('-c', nargs="?", type=str, default="config.yaml", help="config file path")
-    mattermost_parser = subparser.add_parser("mattermost")
-    mattermost_parser.add_argument('-c', nargs="?", type=str, default="config.yaml", help="config file path")
+    telegram_parser = subparsers.add_parser("telegram")
+    mattermost_parser = subparsers.add_parser("mattermost")
+    web_parser = subparsers.add_parser("web")
+
+    for p in [telegram_parser, mattermost_parser, web_parser]:
+        p.add_argument("-c", type=str, default="config.yaml", help="config file path")
 
     return parser.parse_args()
 
@@ -34,6 +39,8 @@ def main():
         from bots.telegram_bot import run_bot
     elif args.command == "mattermost":
         from bots.mattermost_bot import run_bot
+    elif args.command == "web":
+        from bots.web_bot import run_bot
     run_bot()
 
 

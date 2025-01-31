@@ -1,0 +1,15 @@
+{
+  "name": "Beancount Bot",
+  "short_name": "Beancount Bot",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/beancount.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

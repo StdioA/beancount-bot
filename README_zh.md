@@ -31,8 +31,12 @@
 
 如果要使用 Telegram 作为前端，则安装 `python-telegram-bot`: `pip install python-telegram-bot==21.4`;  
 如果要使用 Mattermost 作为前端，则安装 `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
+如果要使用 Web 作为前端，则安装 `mmpy-bot`: `pip install bottle==0.12.25`.
 
-最后运行 bot: `python main.py telegram -c config.yaml` 或 `python main.py mattermost -c config.yaml`
+最后使用你中意的前端来运行 bot:
+- 基于 Telegram：`python main.py telegram -c config.yaml`
+- 基于 Mattermost：`python main.py mattermost -c config.yaml`
+- 基于 Web：`python main.py web -c config.yaml`
 
 ## 使用
 若使用 Telegram 作为前端，可以预先在 [BotFather](https://telegram.me/BotFather) 处配置 bot 命令列表：
@@ -73,7 +77,7 @@ build - 重建向量数据库
 - [ ] 撤回交易
 - [x] Docker 支持
 - [x] 单元测试
-- [ ] 基于 Web 的 Chat UI
+- [x] 基于 Web 的 Chat UI（只支持交易生成和提交）
 - [x] RAG（通过 LLM 进行更精确的元素替换，比如自动将“午饭”改成“晚饭”，或自动更改变更账户等）
 - [ ] 支持增量构建向量数据库（如果用 OpenAI 的 `text-embedding-3-large`，目前构建 1000 条交易组成的数据库大概只需要 ￥0.01，而且目前提供 embedding 的供应商大多不对 embedding 功能收费，所以优先级不高）
 

@@ -31,8 +31,12 @@ If your device supports [sqlite-vec](https://github.com/asg017/sqlite-vec), you 
 
 To use Telegram as a frontend, install `python-telegram-bot`: `pip install python-telegram-bot==21.4`;  
 To use Mattermost as a frontend, install `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
+To use Web as a frontend, install `mmpy-bot`: `pip install bottle==0.12.25`.
 
-Finally, run the bot: `python main.py telegram -c config.yaml` or `python main.py mattermost -c config.yaml`.
+Finally, run the bot based on your preference frontend:
+- Telegram-based: `python main.py telegram -c config.yaml`
+- Mattermost-based: `python main.py mattermost -c config.yaml`.
+- Web-based: `python main.py web -c config.yaml`.
 
 ## Usage
 If Telegram is used as the frontend, you can configure the bot command list in advance at [BotFather](https://telegram.me/BotFather):
@@ -73,7 +77,7 @@ After input, the bot will complete the transaction details and output them for u
 - [ ] Withdraw transaction
 - [x] Docker support
 - [x] Unit tests
-- [ ] Web-based Chat UI
+- [x] Web-based Chat UI (Only transaction generation & submit is supported)
 - [x] RAG (More precise element replacement through LLM, such as automatically changing "lunch" to "dinner", or automatically updating account changes, etc.)
 - [ ] Support incremental construction of vector databases (If using OpenAI's `text-embedding-3-large`, currently building a database consisting of 1000 transactions costs approximately $0.003, and most providers of embedding do not charge for the embedding function, so the priority is not high)
 
