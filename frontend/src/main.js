@@ -7,6 +7,7 @@ const transactionDialog = document.getElementById('transaction-dialog');
 const transactionText = document.getElementById('transaction-text');
 const submitTransactionButton = document.getElementById('submit-transaction');
 const closeDialogButton = document.getElementById('close-dialog');
+const errorDialog = document.getElementById('error-dialog');
 
 function fetchMessages() {
   fetch('/api/messages')
@@ -21,6 +22,15 @@ function fetchMessages() {
 
 fetchMessages();
 
+function popupError(message) {
+  errorDialog.textContent = message;
+  errorDialog.classList.remove('hidden');
+  // Close the dialog after 3 seconds
+  setTimeout(() => {
+    errorDialog.classList.add('hidden');
+  }, 3000);
+}
+
 sendButton.addEventListener('click', () => {
   const message = messageInput.value;
   if (message) {
@@ -31,10 +41,20 @@ sendButton.addEventListener('click', () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ message })
+    }).then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        return response.text().then(text => {
+          throw new Error(text);
+        });
+      }
     })
-      .then(response => response.json())
       .then(data => {
         appendMessage(data);
+      })
+      .catch(error => {
+        popupError(JSON.parse(error.message).error)
       });
   }
 });

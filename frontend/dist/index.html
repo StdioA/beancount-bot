@@ -10,8 +10,8 @@
   <link rel="apple-touch-icon" href="/beancount.png" />
   <link rel="manifest" href="/assets/manifest-C4Sgqbb-.json">
   <title>Beancount Bot</title>
-  <script type="module" crossorigin src="/assets/index-BWG8xpUk.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DTUtH8SK.css">
+  <script type="module" crossorigin src="/assets/index-DU5oXgfi.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CIjSEIvh.css">
 </head>
 <body class="bg-gray-100">
   <div id="app">
@@ -19,14 +19,15 @@
       <div id="message-history" class="flex-1 overflow-y-auto p-4">
       </div>
       <div class="p-4 flex">
-        <input type="text" id="message-input" class="shadow appearance-none border rounded w-5/6 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="请输入消息">
-        <button id="send-button" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold w-1/6 py-2 px-6 rounded focus:outline-none focus:shadow-outline">发送</button>
+        <input type="text" id="message-input" class="shadow appearance-none border rounded w-5/6 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Input your transaction">
+        <button id="send-button" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold w-1/6 py-2 px-1 rounded focus:outline-none focus:shadow-outline">Send</button>
       </div>
       <div id="transaction-dialog" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-svw bg-white p-4 border rounded shadow-md">
         <pre id="transaction-text" class="h-auto overflow-auto"></pre>
-        <button id="submit-transaction" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">提交交易</button>
-        <button id="close-dialog" class="mt-4 ml-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">关闭</button>
+        <button id="submit-transaction" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+        <button id="close-dialog" class="mt-4 ml-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
       </div>
+      <div id="error-dialog" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-svw p-4 border bg-red-50 border-red-100 rounded shadow-md"></div>
     </div>
   </div>
 </body>

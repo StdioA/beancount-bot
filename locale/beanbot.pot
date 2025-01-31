@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-23 07:49+0800\n"
+"POT-Creation-Date: 2025-01-31 19:08+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: bean_utils/bean.py:125 bean_utils/bean.py:131
+#: bean_utils/bean.py:207 bean_utils/bean.py:214
 #, python-brace-format
 msgid "Account {acc} not found"
 msgstr ""
@@ -45,7 +45,7 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#: bots/controller.py:55 bots/controller.py:69
+#: bots/controller.py:55 bots/controller.py:69 conf/i18n_test.py:9
 msgid "Position"
 msgstr ""
 
@@ -59,26 +59,34 @@ msgstr ""
 msgid "Account changes between {start} - {end}"
 msgstr ""
 
-#: bots/mmbot.py:82 bots/telegram_bot.py:107
+#: bots/mattermost_bot.py:82 bots/telegram_bot.py:106
 msgid "Submit"
 msgstr ""
 
-#: bots/mmbot.py:83 bots/telegram_bot.py:108
+#: bots/mattermost_bot.py:83 bots/telegram_bot.py:107
 msgid "Cancel"
 msgstr ""
 
-#: bots/mmbot.py:112
+#: bots/mattermost_bot.py:114 conf/i18n_test.py:18
 msgid "Query account changes"
 msgstr ""
 
-#: bots/mmbot.py:129
+#: bots/mattermost_bot.py:131
 msgid "Query expenses"
 msgstr ""
 
-#: bots/telegram_bot.py:138
+#: bots/telegram_bot.py:137
 msgid "Submitted ✅"
 msgstr ""
 
-#: bots/telegram_bot.py:142
+#: bots/telegram_bot.py:141
 msgid "Cancelled ❌"
+msgstr ""
+
+#: bots/web_bot.py:64
+msgid "Message should not be empty."
+msgstr ""
+
+#: bots/web_bot.py:69
+msgid "Message must start with a number."
 msgstr ""

@@ -1,9 +1,11 @@
 import sqlite3
 from pathlib import Path
-from bottle import Bottle, request, static_file
+from decimal import Decimal, InvalidOperation
+from bottle import Bottle, request, static_file, response
 from bots import controller
 import conf
 from bean_utils.bean import bean_manager
+from conf.i18n import gettext as _
 
 app = Bottle()
 
@@ -58,13 +60,24 @@ def list_messages():
 def chat():
     message = request.json.get('message')
     if not message:
-        return {'error': 'Message is required'}, 400
+        response.status = 400
+        return {'error': _('Message should not be empty.')}
+    try:
+        Decimal(message.split()[0])
+    except InvalidOperation:
+        response.status = 400
+        return {'error': _('Message must start with a number.')}
 
-    resp = controller.render_txs(message)
+    try:
+        resp = controller.render_txs(message)
+    except Exception as e:
+        response.status = 500
+        return {'error': repr(e)}
     if isinstance(resp, controller.ErrorMessage):
-        return {'reply': resp.content}
+        response.status = 400
+        return {'error': resp.content}
+    
     transaction_text = resp[0].content
-
     cursor = request.db.cursor()
     cursor.execute("INSERT INTO messages (message, transaction_text) VALUES (?, ?)", (message, transaction_text))
     request.db.commit()

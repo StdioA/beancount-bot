@@ -22,6 +22,8 @@ def embedding(texts):
     }
     response = requests.post(config.api_url, json=payload, headers=headers, timeout=_TIMEOUT)
     data = response.json()
+    if data.get('code'):
+        raise ValueError("Error occurred during embedding: " + data['message'])
     return data["data"], data["usage"]["total_tokens"]
 
 
