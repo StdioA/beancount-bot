@@ -9,53 +9,47 @@ const submitTransactionButton = document.getElementById('submit-transaction');
 const closeDialogButton = document.getElementById('close-dialog');
 const errorDialog = document.getElementById('error-dialog');
 
-function fetchMessages() {
-  fetch('/api/messages')
-    .then(response => response.json())
-    .then(data => {
-      messageHistory.innerHTML = '';
-      data.messages.forEach(msg => {
-        appendMessage(msg);
-      });
-    });
+async function fetchMessages() {
+  const response = await fetch('/api/messages');
+  const data = await response.json();
+  data.messages.forEach(msg => {
+    appendMessage(msg);
+  })
 }
 
-fetchMessages();
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchMessages();
+});
 
-function popupError(message) {
+async function popupError(message) {
   errorDialog.textContent = message;
   errorDialog.classList.remove('hidden');
   // Close the dialog after 3 seconds
-  setTimeout(() => {
-    errorDialog.classList.add('hidden');
-  }, 3000);
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  errorDialog.classList.add('hidden');
 }
 
-sendButton.addEventListener('click', () => {
+sendButton.addEventListener('click', async () => {
   const message = messageInput.value;
   if (message) {
-    messageInput.value = '';
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ message })
-    }).then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        return response.text().then(text => {
-          throw new Error(text);
-        });
-      }
-    })
-      .then(data => {
-        appendMessage(data);
-      })
-      .catch(error => {
-        popupError(JSON.parse(error.message).error)
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
       });
+      const data = await response.json();
+      if (response.ok) {
+        appendMessage(data);
+        messageInput.value = '';
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      await popupError(error.message);
+    }
   }
 });
 
