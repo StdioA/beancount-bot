@@ -160,7 +160,7 @@ async def clone_txs(update, context):
         return
     # Fetch original message
     resp = controller.clone_txs(message.text)
-    if isinstance(message, controller.ErrorMessage):
+    if isinstance(resp, controller.ErrorMessage):
         await update.message.reply_text(resp.content, reply_to_message_id=message.message_id)
     else:
         await update.message.reply_text(resp.content, reply_to_message_id=message.message_id,

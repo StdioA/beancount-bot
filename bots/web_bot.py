@@ -56,6 +56,7 @@ def list_messages():
         })
     return {'messages': messages}
 
+
 @app.route('/api/chat', method='POST')
 def chat():
     message = request.json.get('message')
@@ -95,19 +96,50 @@ def chat():
 def submit():
     message_id = request.json.get('id')
     if not message_id:
-        return {'error': 'Message ID is required'}, 400
+        response.status = 400
+        return {'error': 'Message ID is required'}
 
     cursor = request.db.cursor()
     cursor.execute("SELECT transaction_text FROM messages WHERE id = ?", (message_id,))
     row = cursor.fetchone()
     if not row:
-        return {'error': 'Message not found'}, 404
+        response.status = 404
+        return {'error': 'Message not found'}
 
     trx = row[0]
     bean_manager.commit_trx(trx.strip())
     cursor.execute("UPDATE messages SET status = 1 WHERE id = ?", (message_id,))
     request.db.commit()
     return {'success': True}
+
+
+@app.route('/api/clone', method='POST')
+def clone_txs():
+    message_id = request.json.get('id')
+    if not message_id:
+        response.status = 400
+        return {'error': 'Message ID is required'}
+
+    cursor = request.db.cursor()
+    cursor.execute("SELECT transaction_text FROM messages WHERE id = ?", (message_id,))
+    row = cursor.fetchone()
+    if not row:
+        response.status = 404
+        return {'error': 'Message not found'}
+
+    trx = row[0]
+    resp = controller.clone_txs(trx.strip())
+    if isinstance(resp, controller.ErrorMessage):
+        response.status = 500
+        return {
+            'success': False,
+            'error': resp.content
+        }
+    bean_manager.commit_trx(resp.content)
+    return {
+        'success': True,
+        'data': resp.content
+    }
 
 
 _root_path = Path(__file__).resolve().parent.parent
@@ -123,4 +155,6 @@ def serve_static(filename):
 def run_bot():
     init_db()
     web_conf = conf.config.bot.web
-    app.run(host=web_conf.host, port=web_conf.port, debug=web_conf.get("debug", False))
+    app.run(host=web_conf.host, port=web_conf.port,
+            debug=web_conf.get("debug", False),
+            reloader=web_conf.get("reloader", False))
