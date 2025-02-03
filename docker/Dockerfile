@@ -1,4 +1,5 @@
 FROM python:3.11-slim
+LABEL org.opencontainers.image.source https://github.com/StdioA/beancount-bot
 
 RUN pip install --upgrade uv && mkdir -p /app
 WORKDIR /app

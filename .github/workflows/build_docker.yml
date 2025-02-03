@@ -28,13 +28,13 @@ jobs:
           length: 7
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -53,15 +53,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Build for arm/v7 and push to GHCR
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/arm/v7
-          file: docker/Dockerfile-armv7
-          push: true
-          tags: |
-            ${{ env.GHCR_REPO }}:latest
-            ${{ env.GHCR_REPO }}:${{ env.SHA }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # - name: Build for arm/v7 and push to GHCR
+      #   id: build_armv7
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     platforms: linux/arm/v7
+      #     file: docker/Dockerfile-armv7
+      #     push: true
+      #     tags: |
+      #       ${{ env.GHCR_REPO }}:armv7
+      #       ${{ env.GHCR_REPO }}:${{ env.SHA }}-armv7
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
