@@ -231,7 +231,7 @@ def test_run_query(mock_config):
     manager = bean.BeanManager(mock_config.beancount.filename)
     result = manager.run_query('SELECT SUM(position) WHERE account="Assets:US:BofA:Checking"')
     assert result
-    assert result[1][0].sum_position.to_string() == "(3076.17 USD)"
+    assert result[1][0][0].to_string() == "(3076.17 USD)"
 
 
 def test_clone_trx(mock_config):

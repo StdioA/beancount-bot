@@ -8,7 +8,7 @@ import shlex
 import subprocess
 from beancount import loader
 from beancount.parser import parser
-from beancount.query import query
+from beanquery.query import run_query
 from beancount.core.data import Open, Close, Transaction
 from beancount.core.number import MISSING
 from typing import List
@@ -149,7 +149,7 @@ class BeanManager:
         """
         A procedural interface to the `beancount.query` module.
         """
-        return query.run_query(self.entries, self.options, q)
+        return run_query(self.entries, self.options, q)
 
     def modify_args_via_vec(self, args) -> List[List[str]]:
         """
