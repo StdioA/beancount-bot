@@ -1,5 +1,5 @@
 beancount==3.1.0
-numpy==2.0.1
+numpy==2.2.2
 fava==1.30
 requests==2.32.3
 pyyaml==6.0.2
