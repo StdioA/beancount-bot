@@ -5,4 +5,4 @@ requests==2.32.3
 pyyaml==6.0.2
 python-telegram-bot==21.4
 mmpy-bot==2.1.4
-bottle==0.12.25
+bottle==0.13.2

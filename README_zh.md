@@ -31,7 +31,7 @@
 
 如果要使用 Telegram 作为前端，则安装 `python-telegram-bot`: `pip install python-telegram-bot==21.4`;  
 如果要使用 Mattermost 作为前端，则安装 `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
-如果要使用 Web 作为前端，则安装 `mmpy-bot`: `pip install bottle==0.12.25`.
+如果要使用 Web 作为前端，则安装 `mmpy-bot`: `pip install bottle==0.13.2`.
 
 最后使用你中意的前端来运行 bot:
 - 基于 Telegram：`python main.py telegram -c config.yaml`

@@ -31,7 +31,7 @@ If your device supports [sqlite-vec](https://github.com/asg017/sqlite-vec), you 
 
 To use Telegram as a frontend, install `python-telegram-bot`: `pip install python-telegram-bot==21.4`;  
 To use Mattermost as a frontend, install `mmpy-bot`: `pip install mmpy-bot==2.1.4`.
-To use Web as a frontend, install `mmpy-bot`: `pip install bottle==0.12.25`.
+To use Web as a frontend, install `mmpy-bot`: `pip install bottle==0.13.2`.
 
 Finally, run the bot based on your preference frontend:
 - Telegram-based: `python main.py telegram -c config.yaml`
