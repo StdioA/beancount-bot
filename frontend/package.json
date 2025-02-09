@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "watch": "vite build --watch",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "logo": "pwa-assets-generator --preset minimal-2023 public/beancount.svg"
   },
   "devDependencies": {
+    "@vite-pwa/assets-generator": "^0.2.6",
     "tailwindcss": "^4.0.1",
     "vite": "^6.0.5",
     "vite-plugin-pwa": "^0.21.1"
