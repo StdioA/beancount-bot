@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "paths": {
+        "virtual:pwa-register": ["./node_modules/vite-plugin-pwa/client.d.ts"]
+      },
+      "resolveJsonModule": true,
+      "module": "Node16",
+      "moduleResolution": "node16"
+    }
+  }

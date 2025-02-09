@@ -1,4 +1,6 @@
+import { registerSW } from 'virtual:pwa-register';
 import './style.css';
+
 
 // 常量定义
 const API_MESSAGES = '/api/messages';
@@ -194,5 +196,28 @@ async function popupError(message: string): Promise<void> {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     transactionDialog.classList.add('hidden');
+  }
+});
+
+
+// Service worker 定时检查 & 刷新提示
+const intervalMS = 60 * 60 * 1000;
+
+const updateSW = registerSW({
+  onRegistered(r) {
+    r &&
+      setInterval(() => {
+        r.update();
+      }, intervalMS);
+  },
+  onNeedRefresh: () => {
+    // 显示更新提示框
+    if (window.confirm(`There is a new version of this app available. Do you want to update?`)) {
+      updateSW();
+    }
+  },
+  onOfflineReady: () => {
+    // 显示离线提示
+    popupError('This app is offline.');
   }
 });

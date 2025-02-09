@@ -1,1 +1,3 @@
 testdata/example.bean binary
+frontend/dist/** binary
+frontend/package-lock.json binary
