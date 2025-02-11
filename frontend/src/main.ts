@@ -76,8 +76,9 @@ sendButton.addEventListener('click', async () => {
         throw new Error(errorMessage);
       }
       const data: Message = await response.json();
-      appendMessage(data);
+      const messageDiv = appendMessage(data);
       messageInput.value = '';
+      messageDiv.click();   // Trigger click event to open the dialog
     } catch (error) {
       console.error('Error sending message:', error);
       await popupError(error.message || 'Failed to send message. Please check console for details.');
@@ -138,7 +139,7 @@ cloneTransactionButton.addEventListener('click', async (event) => {
   await handleTransactionAction(API_CLONE, msgId, cloneTransactionButton);
 });
 
-function appendMessage(msg: Message): void {
+function appendMessage(msg: Message): HTMLElement {
   const { id, message: msgText, transaction_text: txText, status: msgStatus } = msg;
   const messageDiv = document.createElement('div');
   messageDiv.classList.add(
@@ -154,8 +155,6 @@ function appendMessage(msg: Message): void {
   messageDiv.textContent = msgText;
   messageDiv.dataset.msgId = id.toString();
   if (txText) {
-    messageDiv.dataset.transactionText = txText;
-
     messageDiv.addEventListener('click', (event) => {
       transactionText.textContent = txText;
       transactionText.dataset.msgId = id.toString();
@@ -168,6 +167,7 @@ function appendMessage(msg: Message): void {
   }
   messageHistory.appendChild(messageDiv);
   messageHistory.scrollTop = messageHistory.scrollHeight;
+  return messageDiv;
 }
 
 async function markButtonSuccess(button: HTMLButtonElement): Promise<void> {
