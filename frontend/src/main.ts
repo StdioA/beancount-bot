@@ -183,13 +183,13 @@ async function popupError(message: string): Promise<void> {
 
 // Service worker 定时检查 & 刷新提示
 const intervalMS = 60 * 60 * 1000;
-
 const updateSW = registerSW({
-  onRegistered(r) {
-    r &&
+  onRegistered: (r) => {
+    if (r) {
       setInterval(() => {
         r.update();
       }, intervalMS);
+    }
   },
   onNeedRefresh: () => {
     // 显示更新提示框
@@ -203,6 +203,7 @@ const updateSW = registerSW({
   }
 });
 
+// Register event linsteners & fetch messages
 document.addEventListener('DOMContentLoaded', async () => {
   sendButton.addEventListener('click', sendMessage);
   messageInput.addEventListener('keydown', async (event) => {
@@ -211,11 +212,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  submitTransactionButton.addEventListener('click', async (event) => {
+  submitTransactionButton.addEventListener('click', async () => {
     const msgId = transactionText.dataset.msgId as string;
     await handleTransactionAction(API_SUBMIT, msgId, submitTransactionButton);
   });
-  cloneTransactionButton.addEventListener('click', async (event) => {
+  cloneTransactionButton.addEventListener('click', async () => {
     const msgId = transactionText.dataset.msgId as string;
     await handleTransactionAction(API_CLONE, msgId, cloneTransactionButton);
   });

@@ -8,11 +8,16 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "preview": "vite preview",
-    "logo": "pwa-assets-generator --preset minimal-2023 public/beancount.svg"
+    "logo": "pwa-assets-generator --preset minimal-2023 public/beancount.svg",
+    "lint": "eslint src"
   },
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
     "@vite-pwa/assets-generator": "^0.2.6",
+    "eslint": "^9.20.0",
+    "globals": "^15.14.0",
     "tailwindcss": "^4.0.1",
+    "typescript-eslint": "^8.24.0",
     "vite": "^6.0.5",
     "vite-plugin-pwa": "^0.21.1"
   },
