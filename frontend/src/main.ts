@@ -1,7 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
 import './style.css';
 
-
 // 常量定义
 const API_MESSAGES = '/api/messages';
 const API_CHAT = '/api/chat';
@@ -31,6 +30,9 @@ interface ErrorMessage {
   error: string;
 }
 
+// 全局消息存储
+const messageStorage: Map<number, Message> = new Map();
+
 async function fetchMessages(): Promise<void> {
   loadingIndicator.classList.replace('hidden', 'flex');
   try {
@@ -53,50 +55,38 @@ async function fetchMessages(): Promise<void> {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await fetchMessages();
-});
-
-sendButton.addEventListener('click', async () => {
+async function sendMessage() {
   const message = messageInput.value;
-  if (message) {
-    sendButton.disabled = true;
-    try {
-      const response: Response = await fetch(API_CHAT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message })
-      });
-      if (!response.ok) {
-        const errorData: ErrorMessage = await response.json();
-        const errorMessage = errorData.error || `Send message failed: ${response.status} ${response.statusText}`;
-        console.error('Send message failed:', errorMessage, errorData);
-        throw new Error(errorMessage);
-      }
-      const data: Message = await response.json();
-      const messageDiv = appendMessage(data);
-      messageInput.value = '';
-      messageDiv.click();   // Trigger click event to open the dialog
-    } catch (error) {
-      console.error('Error sending message:', error);
-      await popupError(error.message || 'Failed to send message. Please check console for details.');
-    } finally {
-      sendButton.disabled = false;
+  if (message === '') {
+    return;
+  }
+
+  sendButton.disabled = true;
+  try {
+    const response: Response = await fetch(API_CHAT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message })
+    });
+    if (!response.ok) {
+      const errorData: ErrorMessage = await response.json();
+      const errorMessage = errorData.error || `Send message failed: ${response.status} ${response.statusText}`;
+      console.error('Send message failed:', errorMessage, errorData);
+      throw new Error(errorMessage);
     }
+    const data: Message = await response.json();
+    messageInput.value = '';
+    appendMessage(data);
+    showTransactionDialog(data.id);
+  } catch (error) {
+    console.error('Error sending message:', error);
+    await popupError(error.message || 'Failed to send message. Please check console for details.');
+  } finally {
+    sendButton.disabled = false;
   }
-});
-
-closeDialogButton.addEventListener('click', () => {
-  transactionDialog.classList.add('hidden');
-});
-
-document.addEventListener('click', (event: MouseEvent) => {
-  if (!transactionDialog.contains(event.target as Node | null) && !((event.target as HTMLElement)?.classList.contains('message'))) {
-    transactionDialog.classList.add('hidden');
-  }
-});
+}
 
 async function handleTransactionAction(apiEndpoint: string, msgId: string, button: HTMLButtonElement): Promise<void> {
   button.disabled = true;
@@ -129,19 +119,11 @@ async function handleTransactionAction(apiEndpoint: string, msgId: string, butto
   }
 }
 
-submitTransactionButton.addEventListener('click', async (event) => {
-  const msgId = transactionText.dataset.msgId as string;
-  await handleTransactionAction(API_SUBMIT, msgId, submitTransactionButton);
-});
-
-cloneTransactionButton.addEventListener('click', async (event) => {
-  const msgId = transactionText.dataset.msgId as string;
-  await handleTransactionAction(API_CLONE, msgId, cloneTransactionButton);
-});
-
 function appendMessage(msg: Message): HTMLElement {
   const { id, message: msgText, transaction_text: txText, status: msgStatus } = msg;
   const messageDiv = document.createElement('div');
+  messageStorage.set(id, msg);
+
   messageDiv.classList.add(
     'message',
     'mb-2',
@@ -156,18 +138,25 @@ function appendMessage(msg: Message): HTMLElement {
   messageDiv.dataset.msgId = id.toString();
   if (txText) {
     messageDiv.addEventListener('click', (event) => {
-      transactionText.textContent = txText;
-      transactionText.dataset.msgId = id.toString();
-      const isSubmitted = msgStatus === 'submitted';
-      submitTransactionButton.classList.toggle('hidden', isSubmitted);
-      cloneTransactionButton.classList.toggle('hidden', !isSubmitted);
-      transactionDialog.classList.remove('hidden');
+      showTransactionDialog(id);
       event.stopPropagation(); // Prevent document click from immediately closing dialog
     });
   }
   messageHistory.appendChild(messageDiv);
   messageHistory.scrollTop = messageHistory.scrollHeight;
   return messageDiv;
+}
+
+function showTransactionDialog(msgId: number): void {
+  const { transaction_text: txText, status: msgStatus } = messageStorage.get(msgId)!;
+
+  transactionText.textContent = txText;
+  transactionText.dataset.msgId = msgId.toString();
+
+  const isSubmitted = msgStatus === 'submitted';
+  submitTransactionButton.classList.toggle('hidden', isSubmitted);
+  cloneTransactionButton.classList.toggle('hidden', !isSubmitted);
+  transactionDialog.classList.remove('hidden');
 }
 
 async function markButtonSuccess(button: HTMLButtonElement): Promise<void> {
@@ -192,14 +181,6 @@ async function popupError(message: string): Promise<void> {
   errorDialog.classList.add('hidden');
 }
 
-// 添加 ESC 键监听，关闭对话框 (用户体验改进)
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    transactionDialog.classList.add('hidden');
-  }
-});
-
-
 // Service worker 定时检查 & 刷新提示
 const intervalMS = 60 * 60 * 1000;
 
@@ -220,4 +201,38 @@ const updateSW = registerSW({
     // 显示离线提示
     popupError('This app is offline.');
   }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  sendButton.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keydown', async (event) => {
+    if (event.key === 'Enter') {
+      await sendMessage();
+    }
+  });
+
+  submitTransactionButton.addEventListener('click', async (event) => {
+    const msgId = transactionText.dataset.msgId as string;
+    await handleTransactionAction(API_SUBMIT, msgId, submitTransactionButton);
+  });
+  cloneTransactionButton.addEventListener('click', async (event) => {
+    const msgId = transactionText.dataset.msgId as string;
+    await handleTransactionAction(API_CLONE, msgId, cloneTransactionButton);
+  });
+
+  closeDialogButton.addEventListener('click', () => {
+    transactionDialog.classList.add('hidden');
+  });
+  document.addEventListener('click', (event: MouseEvent) => {
+    if (!transactionDialog.contains(event.target as Node | null) && !((event.target as HTMLElement)?.classList.contains('message'))) {
+      transactionDialog.classList.add('hidden');
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      transactionDialog.classList.add('hidden');
+    }
+  });
+
+  await fetchMessages();
 });
