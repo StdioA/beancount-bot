@@ -1,0 +1,83 @@
+{
+    "en": {
+        "translation": {
+            "send": "Send",
+            "submit": "Submit",
+            "clone": "Clone",
+            "close": "Close",
+            "trx_hint": "Input your transaction"
+        }
+    },
+    "zh_CN": {
+        "translation": {
+            "send": "发送",
+            "submit": "提交",
+            "clone": "复制",
+            "close": "关闭",
+            "trx_hint": "输入您的交易"
+        }
+    },
+    "fr_FR": {
+        "translation": {
+            "send": "Envoyer",
+            "submit": "Soumettre",
+            "clone": "Cloner",
+            "close": "Fermer",
+            "trx_hint": "Saisissez votre transaction"
+        }
+    },
+    "ko_KR": {
+        "translation": {
+            "send": "보내기",
+            "submit": "제출",
+            "clone": "복제",
+            "close": "닫기",
+            "trx_hint": "거래를 입력하세요"
+        }
+    },
+    "de_DE": {
+        "translation": {
+            "send": "Senden",
+            "submit": "Absenden",
+            "clone": "Klonen",
+            "close": "Schließen",
+            "trx_hint": "Geben Sie Ihre Transaktion ein"
+        }
+    },
+    "es_ES": {
+        "translation": {
+            "send": "Enviar",
+            "submit": "Enviar",
+            "clone": "Clonar",
+            "close": "Cerrar",
+            "trx_hint": "Ingrese su transacción"
+        }
+    },
+    "ja_JP": {
+        "translation": {
+            "send": "送信",
+            "submit": "送信",
+            "clone": "複製",
+            "close": "閉じる",
+            "trx_hint": "トランザクションを入力してください"
+        }
+    },
+    "ru_RU": {
+        "translation": {
+            "send": "Отправить",
+            "submit": "Отправить",
+            "clone": "Клонировать",
+            "close": "Закрыть",
+            "trx_hint": "Введите вашу транзакцию"
+        }
+    },
+    "zh_TW": {
+        "translation": {
+            "send": "發送",
+            "submit": "提交",
+            "clone": "複製",
+            "close": "關閉",
+            "trx_hint": "輸入您的交易"
+        }
+    }
+}

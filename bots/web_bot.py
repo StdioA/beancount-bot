@@ -141,16 +141,36 @@ def clone_txs():
         'data': resp.content
     }
 
+@app.route('/api/config')
+def config_json():
+    # Set language to invode i18n language detector
+    lang = conf.config.get("language")
+    if lang:
+        response.set_cookie("i18next", lang, expires=30*24*60*60)
+    return {
+        "lang": lang,
+    }
 
 _root_path = Path(__file__).resolve().parent.parent
 
 @app.route('/')
 def serve_frontend():
-    return static_file('index.html', root=Path(_root_path) / 'frontend/dist')
+    response = static_file('index.html', root=Path(_root_path) / 'frontend/dist')
+    # Set language to invode i18n language detector
+    lang = conf.config.get("language")
+    if lang:
+        response.set_cookie("i18next", lang, expires=30*24*60*60)
+    return response
 
 @app.route('/<filename:path>')
 def serve_static(filename):
-    return static_file(filename, root=Path(_root_path) / 'frontend/dist')
+    response = static_file(filename, root=Path(_root_path) / 'frontend/dist')
+    if filename == "index.html":
+        # Set language to invode i18n language detector
+        lang = conf.config.get("language")
+        if lang:
+            response.set_cookie("i18next", lang, expires=30*24*60*60)    
+    return response
 
 def run_bot():
     init_db()

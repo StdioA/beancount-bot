@@ -1,5 +1,6 @@
-import { registerSW } from 'virtual:pwa-register';
 import './style.css';
+import { registerSW } from 'virtual:pwa-register';
+import { initLocale } from './i18n.js';
 
 // 常量定义
 const API_MESSAGES = '/api/messages';
@@ -34,7 +35,6 @@ interface ErrorMessage {
 const messageStorage: Map<number, Message> = new Map();
 
 async function fetchMessages(): Promise<void> {
-  loadingIndicator.classList.replace('hidden', 'flex');
   try {
     const response: Response = await fetch(API_MESSAGES);
     if (!response.ok) {
@@ -50,8 +50,6 @@ async function fetchMessages(): Promise<void> {
   } catch (error) {
     console.error('Error fetching messages:', error);
     await popupError('Failed to fetch messages. Please check console for details.');
-  } finally {
-    loadingIndicator.classList.replace('flex', 'hidden');
   }
 }
 
@@ -235,5 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  await fetchMessages();
+  loadingIndicator.classList.replace('hidden', 'flex');
+  await Promise.all([initLocale(), fetchMessages()]);
+  loadingIndicator.classList.replace('flex', 'hidden');
 });
