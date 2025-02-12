@@ -6,20 +6,26 @@ import translation from './locales/translation.json';
 const API_CLONE = '/api/config';
 
 export async function initLocale(): Promise<void> {
-    let language = undefined;
+    const language = localStorage.getItem('i18nextLng');
+    i18next.init({
+        // debug: true,
+        lng: language,
+        resources: translation,
+    });
+    const localize = locI18next.init(i18next);
+    localize("#app");
+
+    // Async refresh language
     try {
         const response = await fetch(API_CLONE);
         const data = await response.json();
-        language = data.lang;
+        const targetLanguage = data.lang;
+        if (targetLanguage !== language) {
+            localStorage.setItem('i18nextLng', language);
+            i18next.changeLanguage(targetLanguage)
+            localize("#app");
+        }
     } catch (error) {
         console.error('Error fetching language:', error);
     }
-
-    i18next.init({
-        lng: language,
-        // debug: true,
-        resources: translation,
-      });
-    const localize = locI18next.init(i18next);
-    localize("#app");
 }
