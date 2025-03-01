@@ -39,22 +39,59 @@ def init_db():
             )
         ''')
         db.commit()
+        try:
+            cursor = db.cursor()
+            cursor.execute('''
+                ALTER TABLE messages ADD COLUMN favorite TINYINT default 0
+            ''')
+            db.commit()
+        except sqlite3.OperationalError:
+            pass
 
 
 @app.route('/api/messages')
 def list_messages():
     cursor = request.db.cursor()
-    cursor.execute("SELECT id, message, transaction_text, status FROM messages ORDER BY id DESC limit 20")
+    cursor.execute("SELECT id, message, transaction_text, status, favorite FROM messages ORDER BY id DESC limit 20")
     messages = []
-
-    for (id_, message, trx, status) in reversed(cursor.fetchall()):
+    for (id_, message, trx, status, favorite) in reversed(cursor.fetchall()):
         messages.append({
             'id': id_,
             'message': message,
             'transaction_text': trx,
             'status': 'submitted' if status == 1 else 'pending',
+            'favorite': bool(favorite),
         })
-    return {'messages': messages}
+
+    collection_cursor = request.db.cursor()
+    collection_cursor.execute("SELECT id, message, transaction_text, status, favorite FROM messages WHERE favorite = 1 ORDER BY id DESC limit 20")
+    favorites = []
+    for (id_, message, trx, status, favorite) in reversed(collection_cursor.fetchall()):
+        favorites.append({
+            'id': id_,
+            'message': message,
+            'transaction_text': trx,
+            'status': 'submitted' if status == 1 else 'pending',
+            'favorite': bool(favorite),
+        })
+    return {
+        'messages': messages,
+        'favorites': favorites,
+    }
+
+
+@app.route('/api/favorite', method='POST')
+def collect():
+    message_id = request.json.get('id')
+    status = int(request.json.get('favorite'))
+    if not message_id:
+        response.status = 400
+        return {'error': 'Message ID is required'}
+
+    cursor = request.db.cursor()
+    cursor.execute("UPDATE messages SET favorite = ? WHERE id = ?", (status, message_id))
+    request.db.commit()
+    return {'success': True}
 
 
 @app.route('/api/chat', method='POST')

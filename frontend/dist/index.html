@@ -1,37 +1,64 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/beancount.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-  <title>Beancount Bot</title>
-  <script type="module" crossorigin src="/assets/index-WoiBEP8t.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BTNCwBXo.css">
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/beancount.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <title>Beancount Bot</title>
+    <!-- 添加简单选项卡交互脚本 -->
+    <script>
+        
+    </script>
+  <script type="module" crossorigin src="/assets/index-DaYPQUb7.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BEN40OWR.css">
 <link rel="manifest" href="/manifest.webmanifest"></head>
-<body class="bg-gray-100">
-  <div id="app">
-    <div class="container mx-auto h-dvh flex flex-col">
-      <div id="message-history" class="flex-1 overflow-y-auto p-4">
-      </div>
-      <div class="p-4 flex">
-        <input type="text" id="message-input" class="shadow appearance-none border rounded w-5/6 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Input your transaction" data-i18n="[placeholder]trx_hint">
-        <button id="send-button" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold w-1/6 py-2 px-1 rounded focus:outline-none focus:shadow-outline" data-i18n="send">Send</button>
-      </div>
-      <div id="transaction-dialog" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-svw bg-white p-4 border rounded shadow-md">
-        <pre id="transaction-text" class="h-auto overflow-auto"></pre>
-        <button id="submit-transaction" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" data-i18n="submit">Submit</button>
-        <button id="clone-transaction" class="hidden mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" data-i18n="clone">Clone</button>
-        <button id="close-dialog" class="mt-4 ml-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" data-i18n="close">Close</button>
-      </div>
-      <div id="error-dialog" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-svw p-4 border bg-red-50 border-red-100 rounded shadow-md"></div>
+<body class="bg-gray-50">
+  <div id="app" class="flex flex-col h-dvh">
+    <!-- 选项卡导航 -->
+    <div class="flex-shrink-0 bg-white z-10  border-b-gray-700">
+        <div class="flex">
+            <button data-tab-button="history" class="flex-1 py-3 px-4 bg-blue-500 text-white" data-i18n="history">
+                History
+            </button>
+            <button data-tab-button="favorites" class="flex-1 py-3 px-4 bg-gray-100 text-gray-600" data-i18n="favourites">
+                Favourites
+            </button>
+        </div>
     </div>
-    <div id="loading-indicator" class="hidden fixed top-0 left-0 w-full h-full items-center justify-center bg-gray-500/10 z-50">
-      <div class="spinner"></div>
+
+    <!-- 历史记录 -->
+    <div id="message-history" data-tab="history" class="flex-1 p-4 space-y-3 overflow-y-scroll"></div>
+    <!-- 收藏夹 -->
+    <div id="message-favorites" data-tab="favorites" class="flex-1 hidden p-4 space-y-3 overflow-y-scroll"></div>
+
+    <!-- 底部输入栏 -->
+    <div class="flex-shrink-0 left-0 right-0 bg-white border-t-gray-400">
+        <div class="container max-w-3xl mx-auto px-4 py-4">
+            <!-- 生成结果预览 -->
+            <div id="transaction-dialog" class="hidden mb-4 border rounded-lg p-2 bg-gray-50">
+                <pre id="transaction-text" class="text-sm mb-3 overflow-x-scroll"></pre>
+                <div class="flex gap-2">
+                    <button id="submit-transaction" class="flex-1 py-2 bg-green-500 text-white rounded" data-i18n="submit">Submit</button>
+                    <button id="clone-transaction" class="hidden flex-1 py-2 bg-green-500 text-white rounded" data-i18n="clone">Clone</button>
+                    <button id="close-dialog" class="flex-1 py-2 bg-gray-200 rounded" data-i18n="close">Close</button>
+                </div>
+            </div>
+
+            <!-- 输入表单 -->
+            <div class="flex gap-2">
+                <input id="message-input" type="text" laceholder="Input your transaction" data-i18n="[placeholder]trx_hint" class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" >
+                <button id="send-button" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" data-i18n="submit">Submit</button>
+            </div>
+        </div>
     </div>
+  </div>
+  <div id="error-dialog" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-svw p-4 border bg-red-50 border-red-100 rounded shadow-md"></div>
+  <div id="loading-indicator" class="hidden fixed top-0 left-0 w-full h-full items-center justify-center bg-gray-500/10 z-50">
+    <div class="spinner"></div>
   </div>
 </body>
 </html>

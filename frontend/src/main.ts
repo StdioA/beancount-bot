@@ -7,9 +7,11 @@ const API_MESSAGES = '/api/messages';
 const API_CHAT = '/api/chat';
 const API_SUBMIT = '/api/submit';
 const API_CLONE = '/api/clone';
+const API_FAVORITE = '/api/favorite';
 
 // DOM 元素获取 (添加类型断言和判空)
 const messageHistory = document.getElementById('message-history') as HTMLElement;
+const messageFavorites = document.getElementById('message-favorites') as HTMLElement;
 const messageInput = document.getElementById('message-input') as HTMLInputElement;
 const sendButton = document.getElementById('send-button') as HTMLButtonElement;
 const transactionDialog = document.getElementById('transaction-dialog') as HTMLElement;
@@ -20,11 +22,16 @@ const closeDialogButton = document.getElementById('close-dialog') as HTMLButtonE
 const errorDialog = document.getElementById('error-dialog') as HTMLElement;
 const loadingIndicator = document.getElementById('loading-indicator') as HTMLElement;
 
+const notFavoriteStar = "☆";
+const favoriteStar = "★";
+
+type MessageStatus = 'submitted' | 'pending';
 interface Message {
   id: number;
   message: string;
   transaction_text: string;
-  status: string;
+  status: MessageStatus;
+  favorite: boolean;
 }
 
 interface ErrorMessage {
@@ -43,9 +50,12 @@ async function fetchMessages(): Promise<void> {
       await popupError(message);
       return;
     }
-    const { messages }: { messages: Message[] } = await response.json();
+    const { messages, favorites }: { messages: Message[], favorites: Message[] } = await response.json();
     messages.forEach(msg => {
-      appendMessage(msg);
+      appendMessage(messageHistory, msg);
+    });
+    favorites.forEach(msg => {
+      appendMessage(messageFavorites, msg);
     });
   } catch (error) {
     console.error('Error fetching messages:', error);
@@ -76,7 +86,7 @@ async function sendMessage() {
     }
     const data: Message = await response.json();
     messageInput.value = '';
-    appendMessage(data);
+    appendMessage(messageHistory, data);
     showTransactionDialog(data.id);
   } catch (error) {
     console.error('Error sending message:', error);
@@ -103,11 +113,12 @@ async function handleTransactionAction(apiEndpoint: string, msgId: string, butto
       throw new Error(errorMessage);
     }
     // Find the message element and update its status
-    const messageElement = document.querySelector<HTMLDivElement>(`[data-msg-id="${msgId}"]`);
-    if (messageElement) {
-      messageElement.classList.remove('bg-gray-200');
-      messageElement.classList.add('bg-green-200');
-    }
+    const messageElements = document.querySelectorAll<HTMLDivElement>(`[data-msg-id="${msgId}"]>div:last-child`);
+    messageElements.forEach((ele: HTMLDivElement) => {
+      if (ele.querySelector('.ele-check') === null) {
+        ele.insertBefore(buildSubmittedElement(), ele.firstChild);
+      }
+    })
     await markButtonSuccess(button);
   } catch (error) {
     console.error(`Error during transaction action (${apiEndpoint}):`, error);
@@ -117,34 +128,140 @@ async function handleTransactionAction(apiEndpoint: string, msgId: string, butto
   }
 }
 
-function appendMessage(msg: Message): HTMLElement {
-  const { id, message: msgText, transaction_text: txText, status: msgStatus } = msg;
-  const messageDiv = document.createElement('div');
-  messageStorage.set(id, msg);
-
-  messageDiv.classList.add(
-    'message',
-    'mb-2',
-    'p-2',
-    'rounded-md',
-    'cursor-pointer',
-    'self-start',
-    'text-left',
-    msgStatus === 'submitted' ? 'bg-green-200' : 'bg-gray-200',
-  );
-  messageDiv.textContent = msgText;
-  messageDiv.dataset.msgId = id.toString();
-  if (txText) {
-    messageDiv.addEventListener('click', (event) => {
-      showTransactionDialog(id);
-      event.stopPropagation(); // Prevent document click from immediately closing dialog
+async function toggleFavorite(msgId: string): Promise<void> {
+  try {
+    const message = messageStorage.get(Number(msgId));
+    const targetFavorite = !messageStorage.get(Number(msgId))?.favorite;
+    const response = await fetch(API_FAVORITE, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: Number(msgId),
+        favorite: targetFavorite,
+      })
     });
+    if (!response.ok) {
+      const errorData: ErrorMessage = await response.json();
+      const errorMessage = errorData.error || `Toggle favorite failed: ${response.status} ${response.statusText}`;
+      console.error('Toggle favorite failed:', errorMessage, errorData);
+      throw new Error(errorMessage);
+    }
+    message.favorite = targetFavorite;
+
+    const messageElements = document.querySelectorAll<HTMLDivElement>(`[data-msg-id="${msgId}"] div.ele-collect`);
+    messageElements.forEach(messageElement => {
+      messageElement.classList.toggle("text-yellow-500");
+      messageElement.classList.toggle("hover:text-yellow-500");
+      messageElement.innerText = targetFavorite ? favoriteStar: notFavoriteStar;
+    });
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    await popupError(error.message || 'Toggle favorite failed. Please check console for details.');
   }
-  messageHistory.appendChild(messageDiv);
-  messageHistory.scrollTop = messageHistory.scrollHeight;
-  return messageDiv;
 }
 
+// 通用元素构建工具函数
+type ElementConfig = {
+  classes?: string[];
+  attrs?: Record<string, string>;
+  events?: Record<string, EventListener>;
+};
+
+function createElement<T extends HTMLElement>(
+  tag: string,
+  { classes = [], attrs = {}, events = {} }: ElementConfig = {}
+): T {
+  const el = document.createElement(tag) as T;
+  el.classList.add(...classes.filter(Boolean));
+  Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+  Object.entries(events).forEach(([type, handler]) => el.addEventListener(type, handler));
+  return el;
+}
+
+// 样式配置
+
+const STYLES = {
+  messageContainer: (status: MessageStatus) => [
+    'flex', 'container', 'justify-between', 'items-center', 'p-2', 
+    'bg-white', 'rounded-lg', 'shadow-sm',
+    status === 'submitted' ? 'bg-green-200' : 'bg-gray-200'
+  ],
+  textDiv: ['justify-stretch', 'font-medium', 'text-gray-800'],
+  rightContainer: ['flex', 'items-center'],
+  collectIcon: (isFavorite: boolean) => [
+    'justify-end', 'p-2', 'text-gray-400',
+    isFavorite ? 'text-yellow-500' : 'hover:text-yellow-500',
+    'ele-collect'
+  ],
+  submittedIcon: ['justify-end', 'p-2', 'text-green-500', 'font-bold', 'ele-check']
+};
+
+// 模板组件
+function buildSubmittedElement(): HTMLElement {
+  return createElement<HTMLDivElement>('div', {
+    classes: STYLES.submittedIcon,
+    attrs: { 'aria-label': 'Submitted' }
+  }).appendChild(document.createTextNode('✓')).parentElement!;
+}
+
+function buildCollectElement(msg: Message, onClick: EventListener): HTMLElement {
+  return createElement<HTMLDivElement>('div', {
+    classes: STYLES.collectIcon(msg.favorite),
+    events: { click: (e) => {
+      e.stopPropagation();
+      onClick(e);
+    }}
+  }).appendChild(document.createTextNode(msg.favorite ? favoriteStar : notFavoriteStar)).parentElement!;
+}
+
+// 重构后的主函数
+function appendMessage(listElement: HTMLElement, msg: Message): HTMLElement {
+  const { id, message: msgText, transaction_text: txText, status: msgStatus } = msg;
+  messageStorage.set(id, msg);
+
+  // 构建消息主体
+  const messageDiv = createElement<HTMLDivElement>('div', {
+    classes: STYLES.messageContainer(msgStatus),
+    attrs: { 'data-msg-id': id.toString() }
+  });
+
+  // 文本内容区域
+  const textDiv = createElement<HTMLDivElement>('div', {
+    classes: STYLES.textDiv
+  });
+  textDiv.textContent = msgText;
+
+  // 右侧操作区域
+  const rightDiv = createElement<HTMLDivElement>('div', {
+    classes: STYLES.rightContainer
+  });
+
+  // 收藏按钮
+  const collectDiv = buildCollectElement(msg, () => toggleFavorite(id.toString()));
+
+  // 条件元素
+  if (msgStatus === 'submitted') {
+    rightDiv.appendChild(buildSubmittedElement());
+  }
+  rightDiv.appendChild(collectDiv);
+  messageDiv.append(textDiv, rightDiv);
+
+  // 交易文本交互
+  if (txText) {
+    messageDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showTransactionDialog(id);
+    });
+  }
+
+  // 插入列表并滚动
+  listElement.appendChild(messageDiv);
+  listElement.scrollTop = listElement.scrollHeight;
+
+  return messageDiv;
+}
 function showTransactionDialog(msgId: number): void {
   const { transaction_text: txText, status: msgStatus } = messageStorage.get(msgId)!;
 
@@ -201,6 +318,20 @@ const updateSW = registerSW({
   }
 });
 
+function switchTab(tab: string): void {
+  // 切换选项卡
+  document.querySelectorAll('[data-tab]').forEach((el: HTMLElement) => {
+      el.classList.toggle('hidden', el.dataset.tab !== tab)
+  })
+  
+  // 更新按钮状态
+  document.querySelectorAll('[data-tab-button]').forEach((btn: HTMLButtonElement) => {
+      btn.classList.toggle('bg-blue-500', btn.dataset.tabButton === tab)
+      btn.classList.toggle('text-white', btn.dataset.tabButton === tab)
+      btn.classList.toggle('bg-gray-100', btn.dataset.tabButton !== tab)
+  })
+}
+
 // Register event linsteners & fetch messages
 document.addEventListener('DOMContentLoaded', async () => {
   sendButton.addEventListener('click', sendMessage);
@@ -231,6 +362,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (event.key === 'Escape') {
       transactionDialog.classList.add('hidden');
     }
+  });
+
+  document.querySelectorAll('[data-tab-button]').forEach((btn: HTMLButtonElement) => {
+    btn.addEventListener('click', () => {
+      switchTab(btn.dataset.tabButton);
+    });
   });
 
   loadingIndicator.classList.replace('hidden', 'flex');
