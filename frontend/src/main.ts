@@ -87,6 +87,7 @@ async function sendMessage() {
     const data: Message = await response.json();
     messageInput.value = '';
     appendMessage(messageHistory, data);
+    switchTab('history');
     showTransactionDialog(data.id);
   } catch (error) {
     console.error('Error sending message:', error);
@@ -184,7 +185,7 @@ function createElement<T extends HTMLElement>(
 
 const STYLES = {
   messageContainer: (status: MessageStatus) => [
-    'flex', 'container', 'justify-between', 'items-center', 'p-2', 
+    'flex', 'container', 'max-w-4xl', 'justify-between', 'items-center', 'p-2', 
     'bg-white', 'rounded-lg', 'shadow-sm',
     status === 'submitted' ? 'bg-green-200' : 'bg-gray-200'
   ],
@@ -257,11 +258,12 @@ function appendMessage(listElement: HTMLElement, msg: Message): HTMLElement {
   }
 
   // 插入列表并滚动
-  listElement.appendChild(messageDiv);
+  listElement.firstElementChild.appendChild(messageDiv);
   listElement.scrollTop = listElement.scrollHeight;
 
   return messageDiv;
 }
+
 function showTransactionDialog(msgId: number): void {
   const { transaction_text: txText, status: msgStatus } = messageStorage.get(msgId)!;
 
@@ -272,6 +274,10 @@ function showTransactionDialog(msgId: number): void {
   submitTransactionButton.classList.toggle('hidden', isSubmitted);
   cloneTransactionButton.classList.toggle('hidden', !isSubmitted);
   transactionDialog.classList.remove('hidden');
+
+  [messageHistory, messageFavorites].forEach((list: HTMLElement) => {
+    list.scrollTop = list.scrollHeight;
+  })
 }
 
 async function markButtonSuccess(button: HTMLButtonElement): Promise<void> {

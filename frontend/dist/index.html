@@ -13,13 +13,13 @@
     <script>
         
     </script>
-  <script type="module" crossorigin src="/assets/index-DaYPQUb7.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BEN40OWR.css">
+  <script type="module" crossorigin src="/assets/index-Pi7C6stw.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DElZssqo.css">
 <link rel="manifest" href="/manifest.webmanifest"></head>
 <body class="bg-gray-50">
-  <div id="app" class="flex flex-col h-dvh">
+  <div id="app" class="flex flex-col h-dvh max-w-4xl mx-auto">
     <!-- 选项卡导航 -->
-    <div class="flex-shrink-0 bg-white z-10  border-b-gray-700">
+    <div class="flex-grow-0 flex-shrink-0 bg-white border-b-gray-700">
         <div class="flex">
             <button data-tab-button="history" class="flex-1 py-3 px-4 bg-blue-500 text-white" data-i18n="history">
                 History
@@ -31,13 +31,17 @@
     </div>
 
     <!-- 历史记录 -->
-    <div id="message-history" data-tab="history" class="flex-1 p-4 space-y-3 overflow-y-scroll"></div>
+    <div id="message-history" data-tab="history" class="flex-1 overflow-y-scroll">
+        <div class="flex flex-col items-center p-4 space-y-3"></div>
+    </div>
     <!-- 收藏夹 -->
-    <div id="message-favorites" data-tab="favorites" class="flex-1 hidden p-4 space-y-3 overflow-y-scroll"></div>
+    <div id="message-favorites" data-tab="favorites" class="flex-1 hidden overflow-y-scroll">
+        <div class="flex flex-col items-center p-4 space-y-3"></div>
+    </div>
 
     <!-- 底部输入栏 -->
-    <div class="flex-shrink-0 left-0 right-0 bg-white border-t-gray-400">
-        <div class="container max-w-3xl mx-auto px-4 py-4">
+    <div class="flex-grow-0 flex-shrink-0 bg-white border-t-gray-400">
+        <div class="container max-w-4xl mx-auto px-4 py-4">
             <!-- 生成结果预览 -->
             <div id="transaction-dialog" class="hidden mb-4 border rounded-lg p-2 bg-gray-50">
                 <pre id="transaction-text" class="text-sm mb-3 overflow-x-scroll"></pre>
