@@ -121,6 +121,7 @@ async function handleTransactionAction(apiEndpoint: string, msgId: string, butto
       }
     })
     await markButtonSuccess(button);
+    hideTransactionDialog();
   } catch (error) {
     console.error(`Error during transaction action (${apiEndpoint}):`, error);
     await popupError(error.message || `Transaction action failed. Please check console for details.`);
@@ -132,7 +133,7 @@ async function handleTransactionAction(apiEndpoint: string, msgId: string, butto
 async function toggleFavorite(msgId: string): Promise<void> {
   try {
     const message = messageStorage.get(Number(msgId));
-    const targetFavorite = !messageStorage.get(Number(msgId))?.favorite;
+    const targetFavorite = !message?.favorite;
     const response = await fetch(API_FAVORITE, {
       method: 'POST',
       headers: {
@@ -153,8 +154,8 @@ async function toggleFavorite(msgId: string): Promise<void> {
 
     const messageElements = document.querySelectorAll<HTMLDivElement>(`[data-msg-id="${msgId}"] div.ele-collect`);
     messageElements.forEach(messageElement => {
-      messageElement.classList.toggle("text-yellow-500");
-      messageElement.classList.toggle("hover:text-yellow-500");
+      messageElement.classList.toggle("text-yellow-500", targetFavorite);
+      messageElement.classList.toggle("hover:text-yellow-500", !targetFavorite);
       messageElement.innerText = targetFavorite ? favoriteStar: notFavoriteStar;
     });
   } catch (error) {
@@ -182,7 +183,6 @@ function createElement<T extends HTMLElement>(
 }
 
 // 样式配置
-
 const STYLES = {
   messageContainer: (status: MessageStatus) => [
     'flex', 'container', 'max-w-4xl', 'justify-between', 'items-center', 'p-2', 
@@ -217,15 +217,18 @@ function buildCollectElement(msg: Message, onClick: EventListener): HTMLElement 
   }).appendChild(document.createTextNode(msg.favorite ? favoriteStar : notFavoriteStar)).parentElement!;
 }
 
-// 重构后的主函数
 function appendMessage(listElement: HTMLElement, msg: Message): HTMLElement {
-  const { id, message: msgText, transaction_text: txText, status: msgStatus } = msg;
+  const { id, message: msgText, status: msgStatus } = msg;
   messageStorage.set(id, msg);
 
   // 构建消息主体
   const messageDiv = createElement<HTMLDivElement>('div', {
     classes: STYLES.messageContainer(msgStatus),
-    attrs: { 'data-msg-id': id.toString() }
+    attrs: { 'data-msg-id': id.toString() },
+    events: { click: (e) => {
+      e.stopPropagation();
+      showTransactionDialog(id);
+    }}
   });
 
   // 文本内容区域
@@ -248,14 +251,6 @@ function appendMessage(listElement: HTMLElement, msg: Message): HTMLElement {
   }
   rightDiv.appendChild(collectDiv);
   messageDiv.append(textDiv, rightDiv);
-
-  // 交易文本交互
-  if (txText) {
-    messageDiv.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showTransactionDialog(id);
-    });
-  }
 
   // 插入列表并滚动
   listElement.firstElementChild.appendChild(messageDiv);
@@ -280,6 +275,10 @@ function showTransactionDialog(msgId: number): void {
   })
 }
 
+function hideTransactionDialog(): void {
+  transactionDialog.classList.add('hidden');
+}
+
 async function markButtonSuccess(button: HTMLButtonElement): Promise<void> {
   const originalButtonText = button.textContent ?? '';
 
@@ -302,36 +301,14 @@ async function popupError(message: string): Promise<void> {
   errorDialog.classList.add('hidden');
 }
 
-// Service worker 定时检查 & 刷新提示
-const intervalMS = 60 * 60 * 1000;
-const updateSW = registerSW({
-  onRegistered: (r) => {
-    if (r) {
-      setInterval(() => {
-        r.update();
-      }, intervalMS);
-    }
-  },
-  onNeedRefresh: () => {
-    // 显示更新提示框
-    if (window.confirm(`There is a new version of this app available. Do you want to update?`)) {
-      updateSW();
-    }
-  },
-  onOfflineReady: () => {
-    // 显示离线提示
-    popupError('This app is offline.');
-  }
-});
-
 function switchTab(tab: string): void {
   // 切换选项卡
-  document.querySelectorAll('[data-tab]').forEach((el: HTMLElement) => {
+  document.querySelectorAll<HTMLDivElement>('[data-tab]').forEach(el => {
       el.classList.toggle('hidden', el.dataset.tab !== tab)
   })
   
   // 更新按钮状态
-  document.querySelectorAll('[data-tab-button]').forEach((btn: HTMLButtonElement) => {
+  document.querySelectorAll<HTMLButtonElement>('[data-tab-button]').forEach(btn => {
       btn.classList.toggle('bg-blue-500', btn.dataset.tabButton === tab)
       btn.classList.toggle('text-white', btn.dataset.tabButton === tab)
       btn.classList.toggle('bg-gray-100', btn.dataset.tabButton !== tab)
@@ -357,20 +334,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   closeDialogButton.addEventListener('click', () => {
-    transactionDialog.classList.add('hidden');
+    hideTransactionDialog();
   });
   document.addEventListener('click', (event: MouseEvent) => {
     if (!transactionDialog.contains(event.target as Node | null) && !((event.target as HTMLElement)?.classList.contains('message'))) {
-      transactionDialog.classList.add('hidden');
+      hideTransactionDialog();
     }
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      transactionDialog.classList.add('hidden');
+      hideTransactionDialog();
     }
   });
 
-  document.querySelectorAll('[data-tab-button]').forEach((btn: HTMLButtonElement) => {
+  document.querySelectorAll<HTMLButtonElement>('[data-tab-button]').forEach(btn => {
     btn.addEventListener('click', () => {
       switchTab(btn.dataset.tabButton);
     });
@@ -379,4 +356,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadingIndicator.classList.replace('hidden', 'flex');
   await Promise.all([initLocale(), fetchMessages()]);
   loadingIndicator.classList.replace('flex', 'hidden');
+});
+
+// Service worker 定时检查 & 刷新提示
+const intervalMS = 60 * 60 * 1000;
+const updateSW = registerSW({
+  onRegistered: (r) => {
+    if (r) {
+      setInterval(() => {
+        r.update();
+      }, intervalMS);
+    }
+  },
+  onNeedRefresh: () => {
+    // 显示更新提示框
+    if (window.confirm(`There is a new version of this app available. Do you want to update?`)) {
+      updateSW();
+    }
+  },
+  onOfflineReady: () => {
+    // 显示离线提示
+    popupError('This app is offline.');
+  }
 });

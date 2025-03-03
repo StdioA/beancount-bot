@@ -64,7 +64,7 @@ def list_messages():
         })
 
     collection_cursor = request.db.cursor()
-    collection_cursor.execute("SELECT id, message, transaction_text, status, favorite FROM messages WHERE favorite = 1 ORDER BY id DESC limit 20")
+    collection_cursor.execute("SELECT id, message, transaction_text, status, favorite FROM messages WHERE favorite = 1 ORDER BY id DESC")
     favorites = []
     for (id_, message, trx, status, favorite) in reversed(collection_cursor.fetchall()):
         favorites.append({
