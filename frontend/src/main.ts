@@ -13,12 +13,13 @@ import './sw.js';
 async function initMessages(): Promise<void> {
   try {
     const { messages, favorites } = await fetchMessages();
-    messages.forEach(msg => {
-      appendMessage(messageHistory, msg);
+    messages.forEach(async msg => {
+      await appendMessage(messageHistory, msg);
     });
-    favorites.forEach(msg => {
-      appendMessage(messageFavorites, msg);
+    favorites.forEach(async msg => {
+      await appendMessage(messageFavorites, msg);
     });
+    messageHistory.scrollTop = messageHistory.scrollHeight;
   } catch (error) {
     console.error('Error fetching messages:', error);
     await showErrorDialog(errorDialog, 'Failed to fetch messages. Please check console for details.');
@@ -36,8 +37,9 @@ async function handleSendMessage() {
   try {
     const data = await sendChatMessage(message);
     messageInput.value = '';
-    appendMessage(messageHistory, data);
+    await appendMessage(messageHistory, data);
     switchTab('history');
+    messageHistory.scrollTop = messageHistory.scrollHeight;
     showTransactionDialog(data.id);
   } catch (error) {
     console.error('Error sending message:', error);

@@ -95,16 +95,13 @@ export function buildMessageElement(msg: Message): HTMLElement {
 }
 
 // 添加消息到列表
-export function appendMessage(listElement: HTMLElement, msg: Message): HTMLElement {
+export async function appendMessage(listElement: HTMLElement, msg: Message): Promise<HTMLElement> {
   const { id } = msg;
   messageStorage.set(id, msg);
 
   const messageDiv = buildMessageElement(msg);
 
-  // 插入列表并滚动
   listElement.firstElementChild.appendChild(messageDiv);
-  listElement.scrollTop = listElement.scrollHeight;
-
   return messageDiv;
 }
 
