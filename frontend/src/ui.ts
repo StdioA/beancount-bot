@@ -2,7 +2,7 @@
 import type { Message, ElementConfig, MessageStatus } from './types.ts';
 import {
   messageStorage, messageHistory, submitTransactionButton, transactionText, cloneTransactionButton,
-  messageFavorites, transactionDialog, errorDialog,
+  messageFavorites, transactionDialog, errorDialog, slidingElements,
 } from './storage.js';
 import { toggleFavoriteStatus, deleteMessage } from './api.js';
 
@@ -14,7 +14,7 @@ const favoriteStar = "★";
 const STYLES = {
   messageContainer: (status: MessageStatus) => [
     'flex', 'container', 'max-w-4xl', 'justify-between', 'items-center', 'p-2', 
-    'bg-white', 'rounded-lg', 'shadow-sm', 'relative', 'overflow-hidden',
+    'bg-white', 'rounded-lg', 'shadow-sm', 'relative', 'overflow-hidden', 'message',
     status === 'submitted' ? 'bg-green-200' : 'bg-gray-200'
   ],
   textDiv: ['justify-stretch', 'font-medium', 'text-gray-800'],
@@ -26,7 +26,7 @@ const STYLES = {
   ],
   submittedIcon: ['justify-end', 'p-2', 'text-green-500', 'font-bold', 'ele-check'],
   deleteButton: ['absolute', 'right-0', 'top-0', 'bottom-0', 'bg-red-500', 'text-white', 'flex', 'items-center', 'justify-center',
-                 'w-10', 'px-4', 'transform', 'translate-x-full', 'transition-transform', 'duration-300', 'ease-out']
+                 'w-10', 'px-4', 'transform', 'translate-x-full', 'transition-transform', 'duration-300', 'ease-out', 'ele-delete']
 };
 
 // 通用元素构建工具函数
@@ -87,6 +87,14 @@ function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
   return button;
 }
 
+function clearSlidingElements() {
+  slidingElements.forEach(el => {
+    el.style.transform = 'translateX(0)';
+    el.querySelector<HTMLElement>('.ele-delete').style.transform = 'translateX(100%)';
+  });
+  slidingElements.clear();
+}
+
 export function buildMessageElement(msg: Message): HTMLElement {
   const { id, message: msgText, status: msgStatus } = msg;
 
@@ -95,8 +103,10 @@ export function buildMessageElement(msg: Message): HTMLElement {
     classes: STYLES.messageContainer(msgStatus),
     attrs: { 'data-msg-id': id.toString() },
     events: { click: (e) => {
-      e.stopPropagation();
       showTransactionDialog(id);
+      // 将所有划过去的元素复位
+      clearSlidingElements();
+      e.stopPropagation();
     }}
   });
 
@@ -129,14 +139,18 @@ export function buildMessageElement(msg: Message): HTMLElement {
   let startX = 0;
   let currentX = 0;
   let isDragging = false;
+  let draggingStartTime = 0;
+  const dragThreshold = 100;
   
   const handleTouchStart = (e: TouchEvent) => {
     startX = e.touches[0].clientX;
     isDragging = true;
+    draggingStartTime = Date.now();
   };
   
   const handleTouchMove = (e: TouchEvent) => {
     if (!isDragging) return;
+    if (Date.now() - draggingStartTime < dragThreshold) return; // 忽略短时间内的滑动，防止误触
     currentX = e.touches[0].clientX;
     const diffX = startX - currentX;
     
@@ -151,18 +165,23 @@ export function buildMessageElement(msg: Message): HTMLElement {
   
   const handleTouchEnd = () => {
     if (!isDragging) return;
+    if (Date.now() - draggingStartTime < dragThreshold) return; // 忽略短时间内的滑动，防止误触
+
     isDragging = false;
     
     const diffX = startX - currentX;
     
     // 如果滑动距离超过阈值，显示删除按钮
     if (diffX > 40) {
+      clearSlidingElements(); // 将其他元素复位
       messageDiv.style.transform = 'translateX(-80px)';
       deleteButton.style.transform = 'translateX(calc(100% - 80px))';
+      slidingElements.add(messageDiv);
     } else {
       // 否则恢复原位
       messageDiv.style.transform = 'translateX(0)';
       deleteButton.style.transform = 'translateX(100%)';
+      slidingElements.delete(messageDiv);
     }
   };
   
@@ -171,6 +190,7 @@ export function buildMessageElement(msg: Message): HTMLElement {
     if (!messageDiv.contains(e.target as Node)) {
       messageDiv.style.transform = 'translateX(0)';
       deleteButton.style.transform = 'translateX(100%)';
+      slidingElements.delete(messageDiv);
     }
   });
   

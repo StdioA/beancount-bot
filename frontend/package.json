@@ -22,6 +22,8 @@
     "vite-plugin-pwa": "^0.21.1"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@tailwindcss/postcss": "^4.0.1",
     "@tailwindcss/vite": "^4.0.1",
     "i18next": "^24.2.2",

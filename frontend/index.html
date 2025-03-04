@@ -10,18 +10,17 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <title>Beancount Bot</title>
     <link rel="stylesheet" href="./src/style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body class="bg-gray-100">
   <div id="app" class="flex flex-col h-dvh max-w-4xl mx-auto shadow-lg rounded-lg overflow-hidden">
     <!-- 选项卡导航 -->
     <div class="flex-grow-0 flex-shrink-0 bg-white border-b border-gray-200 shadow-sm">
         <div class="flex">
-            <button data-tab-button="history" class="flex-1 py-3 px-4 bg-blue-500 text-white font-medium flex items-center justify-center gap-2" data-i18n="history">
-                <i class="fas fa-history text-sm"></i> <span>History</span>
+            <button data-tab-button="history" class="flex-1 py-3 px-4 bg-blue-500 text-white font-medium flex items-center justify-center gap-2">
+                <i class="fas fa-history text-sm"></i> <span data-i18n="history">History</span>
             </button>
-            <button data-tab-button="favorites" class="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-medium flex items-center justify-center gap-2" data-i18n="favourites">
-                <i class="fas fa-star text-sm"></i> <span>Favourites</span>
+            <button data-tab-button="favorites" class="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-medium flex items-center justify-center gap-2">
+                <i class="fas fa-star text-sm"></i> <span data-i18n="favourites">Favourites</span>
             </button>
         </div>
     </div>
@@ -48,11 +47,11 @@
                 </div>
                 <pre id="transaction-text" class="text-sm mb-4 p-3 bg-gray-50 rounded border border-gray-200 overflow-x-auto"></pre>
                 <div class="flex gap-3">
-                    <button id="submit-transaction" class="flex-1 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-md font-medium flex items-center justify-center gap-2" data-i18n="submit">
-                        <i class="fas fa-check"></i> <span>Submit</span>
+                    <button id="submit-transaction" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-medium flex items-center justify-center gap-2">
+                        <i class="fas fa-check"></i> <span data-i18n="submit">Submit</span>
                     </button>
-                    <button id="clone-transaction" class="hidden flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-medium flex items-center justify-center gap-2" data-i18n="clone">
-                        <i class="fas fa-copy"></i> <span>Clone</span>
+                    <button id="clone-transaction" class="hidden flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-medium flex items-center justify-center gap-2">
+                        <i class="fas fa-copy"></i> <span data-i18n="clone">Clone</span>
                     </button>
                 </div>
             </div>
@@ -65,8 +64,8 @@
                         <i class="fas fa-receipt"></i>
                     </div>
                 </div>
-                <button id="send-button" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium flex items-center gap-2" data-i18n="submit">
-                    <i class="fas fa-paper-plane"></i> <span>Submit</span>
+                <button id="send-button" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium flex items-center gap-2">
+                    <i class="fas fa-paper-plane"></i> <span data-i18n="submit">Submit</span>
                 </button>
             </div>
         </div>

@@ -15,3 +15,5 @@ export const cloneTransactionButton = document.getElementById('clone-transaction
 export const closeDialogButton = document.getElementById('close-dialog') as HTMLButtonElement;
 export const errorDialog = document.getElementById('error-dialog') as HTMLElement;
 export const loadingIndicator = document.getElementById('loading-indicator') as HTMLElement;
+
+export let slidingElements = new Set<HTMLElement>();

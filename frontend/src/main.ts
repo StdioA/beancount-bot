@@ -1,4 +1,5 @@
 import './style.css';
+import './icons.js';
 import { initLocale } from './i18n.js';
 import { fetchMessages, sendChatMessage, submitTransaction, cloneTransaction } from './api.js';
 import { buildSubmittedElement, appendMessage, showErrorDialog, switchTab, markButtonSuccess, showTransactionDialog, hideTransactionDialog,  } from './ui.js';
