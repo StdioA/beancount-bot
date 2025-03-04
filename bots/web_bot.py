@@ -94,6 +94,19 @@ def collect():
     return {'success': True}
 
 
+@app.route('/api/delete', method='POST')
+def collect():
+    message_id = request.json.get('id')
+    if not message_id:
+        response.status = 400
+        return {'error': 'Message ID is required'}
+
+    cursor = request.db.cursor()
+    cursor.execute("DELETE FROM messages WHERE id = ?", (message_id, ))
+    request.db.commit()
+    return {'success': True}
+
+
 @app.route('/api/chat', method='POST')
 def chat():
     message = request.json.get('message')

@@ -4,7 +4,7 @@ import {
   messageStorage, messageHistory, submitTransactionButton, transactionText, cloneTransactionButton,
   messageFavorites, transactionDialog, errorDialog,
 } from './storage.js';
-import { toggleFavoriteStatus } from './api.js';
+import { toggleFavoriteStatus, deleteMessage } from './api.js';
 
 // 常量定义
 const notFavoriteStar = "☆";
@@ -14,7 +14,7 @@ const favoriteStar = "★";
 const STYLES = {
   messageContainer: (status: MessageStatus) => [
     'flex', 'container', 'max-w-4xl', 'justify-between', 'items-center', 'p-2', 
-    'bg-white', 'rounded-lg', 'shadow-sm',
+    'bg-white', 'rounded-lg', 'shadow-sm', 'relative', 'overflow-hidden',
     status === 'submitted' ? 'bg-green-200' : 'bg-gray-200'
   ],
   textDiv: ['justify-stretch', 'font-medium', 'text-gray-800'],
@@ -24,7 +24,9 @@ const STYLES = {
     isFavorite ? 'text-yellow-500' : 'hover:text-yellow-500',
     'ele-collect'
   ],
-  submittedIcon: ['justify-end', 'p-2', 'text-green-500', 'font-bold', 'ele-check']
+  submittedIcon: ['justify-end', 'p-2', 'text-green-500', 'font-bold', 'ele-check'],
+  deleteButton: ['absolute', 'right-0', 'top-0', 'bottom-0', 'bg-red-500', 'text-white', 'flex', 'items-center', 'justify-center',
+                 'w-10', 'px-4', 'transform', 'translate-x-full', 'transition-transform', 'duration-300', 'ease-out']
 };
 
 // 通用元素构建工具函数
@@ -56,6 +58,33 @@ export function buildCollectElement(msg: Message, onClick: EventListener): HTMLE
       onClick(e);
     }}
   }).appendChild(document.createTextNode(msg.favorite ? favoriteStar : notFavoriteStar)).parentElement!;
+}
+
+function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
+  const id = Number(messageDiv.dataset.msgId!);
+  const button = createElement<HTMLDivElement>('div', {
+    classes: STYLES.deleteButton,
+    events: { click: async (e) => {
+      e.stopPropagation();
+      try {
+        // 添加左滑消失动画
+        messageDiv.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+        messageDiv.style.transform = 'translateX(-100%)';
+        messageDiv.style.opacity = '0';
+        
+        // 等待动画完成后再删除元素
+        setTimeout(async () => {
+          await deleteMessage(id);
+          document.querySelectorAll(`[data-msg-id="${id}"]`)?.forEach(el => el.remove());
+        }, 300);
+      } catch (error) {
+        console.error('Error deleting message:', error);
+        await showErrorDialog(errorDialog, error.message || '删除消息失败。请查看控制台获取详细信息。');
+      }
+    }}
+  });
+  button.innerHTML = '<i class="fa-solid fa-trash"></i>';
+  return button;
 }
 
 export function buildMessageElement(msg: Message): HTMLElement {
@@ -91,6 +120,64 @@ export function buildMessageElement(msg: Message): HTMLElement {
   }
   rightDiv.appendChild(collectDiv);
   messageDiv.append(textDiv, rightDiv);
+  
+  // 添加删除按钮
+  const deleteButton = createDeleteButton(messageDiv);
+  messageDiv.appendChild(deleteButton);
+  
+  // 添加左滑手势
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  
+  const handleTouchStart = (e: TouchEvent) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  };
+  
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging) return;
+    currentX = e.touches[0].clientX;
+    const diffX = startX - currentX;
+    
+    // 只允许左滑
+    if (diffX > 0) {
+      // 限制最大滑动距离为删除按钮宽度
+      const translateX = Math.min(diffX, 80);
+      messageDiv.style.transform = `translateX(-${translateX}px)`;
+      deleteButton.style.transform = `translateX(calc(100% - ${translateX}px))`;
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const diffX = startX - currentX;
+    
+    // 如果滑动距离超过阈值，显示删除按钮
+    if (diffX > 40) {
+      messageDiv.style.transform = 'translateX(-80px)';
+      deleteButton.style.transform = 'translateX(calc(100% - 80px))';
+    } else {
+      // 否则恢复原位
+      messageDiv.style.transform = 'translateX(0)';
+      deleteButton.style.transform = 'translateX(100%)';
+    }
+  };
+  
+  // 点击其他区域时恢复原位
+  document.addEventListener('click', (e) => {
+    if (!messageDiv.contains(e.target as Node)) {
+      messageDiv.style.transform = 'translateX(0)';
+      deleteButton.style.transform = 'translateX(100%)';
+    }
+  });
+  
+  messageDiv.addEventListener('touchstart', handleTouchStart);
+  messageDiv.addEventListener('touchmove', handleTouchMove);
+  messageDiv.addEventListener('touchend', handleTouchEnd);
+  
   return messageDiv;
 }
 

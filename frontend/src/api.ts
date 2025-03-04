@@ -7,7 +7,8 @@ const API_ENDPOINTS = {
   CHAT: '/api/chat',
   SUBMIT: '/api/submit',
   CLONE: '/api/clone',
-  FAVORITE: '/api/favorite'
+  FAVORITE: '/api/favorite',
+  DELETE: '/api/delete'
 };
 
 // 错误处理函数
@@ -66,6 +67,20 @@ export async function toggleFavoriteStatus(id: number, favorite: boolean): Promi
   if (!response.ok) {
     const errorData = await handleApiError(response);
     throw new Error(errorData.error || `切换收藏状态失败: ${response.status} ${response.statusText}`);
+  }
+}
+
+// 删除消息
+export async function deleteMessage(id: number): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.DELETE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  });
+  
+  if (!response.ok) {
+    const errorData = await handleApiError(response);
+    throw new Error(errorData.error || `删除消息失败: ${response.status} ${response.statusText}`);
   }
 }
 
