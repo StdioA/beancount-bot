@@ -5,10 +5,9 @@ import {
   messageFavorites, transactionDialog, errorDialog, slidingElements,
 } from './storage.js';
 import { toggleFavoriteStatus, deleteMessage } from './api.js';
+import { buildIconDom, faTrash, faCheck, faStar } from './icons.js';
 
-// 常量定义
-const notFavoriteStar = "☆";
-const favoriteStar = "★";
+// 常量定义已移除，使用Font Awesome图标替代
 
 // 样式配置
 const STYLES = {
@@ -22,6 +21,7 @@ const STYLES = {
   collectIcon: (isFavorite: boolean) => [
     'justify-end', 'p-2', 'text-gray-400',
     isFavorite ? 'text-yellow-500' : 'hover:text-yellow-500',
+    'hover:scale-120', 'transition', 'duration-20',
     'ele-collect'
   ],
   submittedIcon: ['justify-end', 'p-2', 'text-green-500', 'font-bold', 'ele-check'],
@@ -43,21 +43,25 @@ export function createElement<T extends HTMLElement>(
 
 // 构建已提交标记元素
 export function buildSubmittedElement(): HTMLElement {
-  return createElement<HTMLDivElement>('div', {
+  const element = createElement<HTMLDivElement>('div', {
     classes: STYLES.submittedIcon,
     attrs: { 'aria-label': 'Submitted' }
-  }).appendChild(document.createTextNode('✓')).parentElement!;
+  });
+  element.appendChild(buildIconDom(faCheck));
+  return element;
 }
 
 // 构建收藏按钮元素
 export function buildCollectElement(msg: Message, onClick: EventListener): HTMLElement {
-  return createElement<HTMLDivElement>('div', {
+  const element = createElement<HTMLDivElement>('div', {
     classes: STYLES.collectIcon(msg.favorite),
     events: { click: (e) => {
       e.stopPropagation();
       onClick(e);
     }}
-  }).appendChild(document.createTextNode(msg.favorite ? favoriteStar : notFavoriteStar)).parentElement!;
+  });
+  element.appendChild(buildIconDom(faStar));
+  return element;
 }
 
 function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
@@ -83,7 +87,8 @@ function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
       }
     }}
   });
-  button.innerHTML = '<i class="fa-solid fa-trash"></i>';
+  // 使用导入的 faTrash 图标创建元素
+  button.appendChild(buildIconDom(faTrash));
   return button;
 }
 
@@ -290,7 +295,9 @@ export async function handleToggleFavorite(msgId: string): Promise<void> {
     messageElements.forEach(messageElement => {
       messageElement.classList.toggle("text-yellow-500", targetFavorite);
       messageElement.classList.toggle("hover:text-yellow-500", !targetFavorite);
-      messageElement.innerText = targetFavorite ? favoriteStar: notFavoriteStar;
+      // 清空现有内容并添加图标
+      // messageElement.innerHTML = '';
+      // messageElement.appendChild(buildIconDom(faStar));
     });
   } catch (error) {
     console.error('Error toggling favorite:', error);

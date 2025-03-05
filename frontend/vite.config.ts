@@ -12,7 +12,7 @@ export default defineConfig({
       injectRegister: 'auto',
       manifest: manifest as ManifestOptions,
       workbox: {
-        globPatterns: ['**/*.{js,css,html}'],
+        globPatterns: ['*.{js,css,html}'],
       },
     }),
   ],

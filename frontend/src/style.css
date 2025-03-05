@@ -44,13 +44,17 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-/* 收藏按钮动画 */
-.ele-collect {
-  transition: transform 0.2s;
+/* 添加触摸设备上的收藏按钮动画 */
+@media (hover: none) {
+  .ele-collect:active {
+    animation: touchScale 0.4s ease-out;
+  }
 }
 
-.ele-collect:hover {
-  transform: scale(1.2);
+@keyframes touchScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 /* 对话框动画 */

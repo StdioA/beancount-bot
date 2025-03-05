@@ -16,4 +16,4 @@ export const closeDialogButton = document.getElementById('close-dialog') as HTML
 export const errorDialog = document.getElementById('error-dialog') as HTMLElement;
 export const loadingIndicator = document.getElementById('loading-indicator') as HTMLElement;
 
-export let slidingElements = new Set<HTMLElement>();
+export const slidingElements = new Set<HTMLElement>();
