@@ -79,7 +79,7 @@ function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
         // 等待动画完成后再删除元素
         setTimeout(async () => {
           await deleteMessage(id);
-          document.querySelectorAll(`[data-msg-id="${id}"]`)?.forEach(el => el.remove());
+          document.querySelectorAll(`.message[data-msg-id="${id}"]`)?.forEach(el => el.remove());
         }, 300);
       } catch (error) {
         console.error('Error deleting message:', error);
