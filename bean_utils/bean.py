@@ -3,14 +3,14 @@ from pathlib import Path
 from datetime import datetime
 from decimal import Decimal
 from conf.i18n import gettext as _
-import re
 import shlex
 import subprocess
 from beancount import loader
 from beancount.parser import parser
 from beanquery.query import run_query
-from beancount.core.data import Open, Close, Transaction
+from beancount.core import data as d
 from beancount.core.number import MISSING
+from beancount.parser.printer import EntryPrinter
 from typing import List
 from bean_utils.vec_query import query_txs
 from bean_utils.rag import complete_rag
@@ -18,13 +18,6 @@ import conf
 
 
 NoTransactionError = ValueError("No transaction found")
-transaction_tmpl = """
-{date} * "{payee}" "{desc}"{tags}
-  {from_account}\t\t\t{amount:.2f} {currency}
-  {to_account}"""
-
-
-TXS_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}(.*)")
 
 
 class BeanManager:
@@ -32,6 +25,7 @@ class BeanManager:
         self.fname = fname or conf.config.beancount.filename
         self.currency = conf.config.beancount.currency
         self._load()
+        self._printer = EntryPrinter(dcontext=self._options.get("dcontext"))
 
     def _load(self):
         """
@@ -55,10 +49,10 @@ class BeanManager:
         self.mtimes = {}
         self.account_files = set()
         for ent in self._entries:
-            if isinstance(ent, Open):
+            if isinstance(ent, d.Open):
                 self._accounts.add(ent.account)
                 self.account_files.add(ent.meta["filename"])
-            elif isinstance(ent, Close):
+            elif isinstance(ent, d.Close):
                 self._accounts.remove(ent.account)
                 self.account_files.add(ent.meta["filename"])
 
@@ -128,7 +122,7 @@ class BeanManager:
         """
         target = None
         for trx in reversed(self._entries):
-            if not isinstance(trx, Transaction):
+            if not isinstance(trx, d.Transaction):
                 continue
             if trx.payee == payee:
                 target = trx
@@ -216,27 +210,42 @@ class BeanManager:
 
         if payee is None:
             payee, *extra = extra
-        trx_info = {
-            "date": datetime.now().astimezone().date(),
-            "payee": payee,
-            "from_account": from_account,
-            "to_account": to_account,
-            "amount": -amount,
-            "desc": "",
-            "tags": "",
-            "currency": self.currency,
-        }
-
-        tags = []
+        desc, tags = "", []
         for arg in extra:
             if arg.startswith(("#", "^")):
-                tags.append(arg)
-            elif not trx_info["desc"]:
-                trx_info["desc"] = arg
-        if tags:
-            trx_info["tags"] = " " + " ".join(tags)
+                tags.append(arg[1:])
+            elif not desc:
+                desc = arg
 
-        return transaction_tmpl.format(**trx_info)
+        trx = d.Transaction(
+            date=datetime.now().astimezone().date(),
+            flag="*",
+            payee=payee,
+            narration=desc,
+            meta={"lineno": 1},
+            postings=[
+                d.Posting(
+                    account=from_account,
+                    units=d.Amount(-amount, self.currency),
+                    meta={"lineno": 1},
+                    cost=None,
+                    price=None,
+                    flag=None,
+                ),
+                d.Posting(
+                    account=to_account,
+                    units=MISSING,
+                    meta={"lineno": 1},
+                    cost=None,
+                    price=None,
+                    flag=None,
+                ),
+            ],
+            tags=frozenset(tags),
+            links=frozenset(),
+        )
+        return "\n" + self._printer(trx)
+
 
     def generate_trx(self, line) -> List[str]:
         """
@@ -291,17 +300,21 @@ class BeanManager:
         """
         entries, _, _ = parser.parse_string(text)
         try:
-            txs = next(e for e in entries if isinstance(e, Transaction))
+            txs = next(e for e in entries if isinstance(e, d.Transaction))
         except StopIteration as e:
             raise NoTransactionError from e
 
-        # Parse transaction from given string
-        lines = [txs.meta["lineno"]] + [p.meta["lineno"] for p in txs.postings]
-        segments = text.split("\n")[min(lines)-1:max(lines)]
-        # Modify date
-        today = str(datetime.now().astimezone().date())
-        segments[0] = TXS_DATE_RE.sub(rf"{today}\1", segments[0])
-        return "\n".join(segments)
+        txs = d.Transaction(
+            date=datetime.now().astimezone().date(),
+            flag=txs.flag,
+            payee=txs.payee,
+            narration=txs.narration,
+            meta=txs.meta,
+            postings=txs.postings,
+            tags=txs.tags,
+            links=txs.links,
+        )
+        return "\n" + self._printer(txs)
 
     def commit_trx(self, data):
         """

@@ -7,8 +7,6 @@ import {
 import { toggleFavoriteStatus, deleteMessage } from './api.js';
 import { buildIconDom, faTrash, faCheck, faStar } from './icons.js';
 
-// 常量定义已移除，使用Font Awesome图标替代
-
 // 样式配置
 const STYLES = {
   messageContainer: (status: MessageStatus) => [

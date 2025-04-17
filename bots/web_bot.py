@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
 from decimal import Decimal, InvalidOperation
+import requests
 from bottle import Bottle, request, static_file, response
 from bots import controller
 import conf
@@ -13,9 +14,9 @@ app = Bottle()
 DATABASE = conf.config.bot.web.chat_db
 
 def get_db():
-    db = getattr(request, '_database', None)
+    db = getattr(request, 'database', None)
     if db is None:
-        db = request._database = sqlite3.connect(DATABASE)
+        db = request.database = sqlite3.connect(DATABASE)
     return db
 
 @app.hook('before_request')
@@ -95,7 +96,7 @@ def collect():
 
 
 @app.route('/api/delete', method='POST')
-def collect():
+def delete_trx():
     message_id = request.json.get('id')
     if not message_id:
         response.status = 400
@@ -121,7 +122,7 @@ def chat():
 
     try:
         resp = controller.render_txs(message)
-    except Exception as e:
+    except (ValueError, requests.exceptions.RequestException) as e:
         response.status = 500
         return {'error': repr(e)}
     if isinstance(resp, controller.ErrorMessage):
