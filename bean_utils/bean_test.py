@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 import shutil
 from pathlib import Path
 import requests
@@ -246,6 +247,15 @@ def test_clone_trx(mock_config):
     exp_trx = f"""
     {today} * "Kin Soy" "Eating" #tag1 #tag2
         Assets:US:BofA:Checking  -23.40 USD
+        Expenses:Food:Restaurant
+    """
+    assert_txs_equal(trx, exp_trx)
+
+    trx = manager.clone_trx(param, Decimal("12.3"))
+    assert trx != ""
+    exp_trx = f"""
+    {today} * "Kin Soy" "Eating" #tag1 #tag2
+        Assets:US:BofA:Checking  -12.30 USD
         Expenses:Food:Restaurant
     """
     assert_txs_equal(trx, exp_trx)

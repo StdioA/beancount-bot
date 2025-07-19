@@ -340,8 +340,30 @@ class BeanManager:
             SubprocessError: If the bean-format command fails to execute.
         """
         fname = self.fname
+
+        # Check the end of file to determine proper spacing
+        try:
+            with open(fname, 'rb') as f:
+                # Seek to end and check last few bytes
+                f.seek(-10, 2)  # Go to 10 bytes from end
+                end_content = f.read().decode('utf-8', errors='ignore')
+
+                # Count existing trailing newlines
+                newline_count = 0
+                for char in reversed(end_content):
+                    if char == '\n':
+                        newline_count += 1
+                    else:
+                        break
+        except (IOError, OSError):
+            # If file doesn't exist or can't be read, treat as new file
+            newline_count = 0
+
+        # Calculate needed spacing: ensure exactly one blank line before, then one after
+        prefix = "\n" if newline_count == 0 else ""
+
         with open(fname, 'a') as f:
-            f.write("\n" + data + "\n")
+            f.write(prefix + data.lstrip("\n") + "\n")
         subprocess.run(["bean-format", "-o", shlex.quote(str(fname)), shlex.quote(str(fname))],   # noqa: S607,S603
                        shell=False)
 
