@@ -177,9 +177,17 @@ def clone_txs():
     if not row:
         response.status = 404
         return {'error': 'Message not found'}
+    
+    amount = request.json.get("amount")
+    if amount is not None:
+        try:
+            amount = Decimal(amount)
+        except InvalidOperation:
+            response.status = 400
+            return {'error': 'Amount is invalid'}
 
     trx = row[0]
-    resp = controller.clone_txs(trx.strip())
+    resp = controller.clone_txs(trx.strip(), amount)
     if isinstance(resp, controller.ErrorMessage):
         response.status = 500
         return {

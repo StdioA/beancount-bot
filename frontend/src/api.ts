@@ -8,7 +8,7 @@ const API_ENDPOINTS = {
   SUBMIT: '/api/submit',
   CLONE: '/api/clone',
   FAVORITE: '/api/favorite',
-  DELETE: '/api/delete'
+  DELETE: '/api/delete',
 };
 
 // 错误处理函数
@@ -49,6 +49,20 @@ export async function sendChatMessage(message: string): Promise<Message> {
 // 提交交易
 export async function submitTransaction(id: number): Promise<void> {
   await handleTransactionRequest(API_ENDPOINTS.SUBMIT, id);
+}
+
+// 提交带修改金额的交易
+export async function submitTransactionWithAmount(id: number, amount: string): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.CLONE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, amount })
+  });
+  
+  if (!response.ok) {
+    const errorData = await handleApiError(response);
+    throw new Error(errorData.error || `提交修改金额交易失败: ${response.status} ${response.statusText}`);
+  }
 }
 
 // 克隆交易

@@ -16,4 +16,12 @@ export const closeDialogButton = document.getElementById('close-dialog') as HTML
 export const errorDialog = document.getElementById('error-dialog') as HTMLElement;
 export const loadingIndicator = document.getElementById('loading-indicator') as HTMLElement;
 
+// 数字键盘相关元素
+export const modifyAmountButton = document.getElementById('modify-amount') as HTMLButtonElement;
+export const submitWithAmountButton = document.getElementById('submit-with-amount') as HTMLButtonElement;
+export const numpadContainer = document.getElementById('numpad-container') as HTMLElement;
+export const amountDisplay = document.getElementById('amount-display') as HTMLElement;
+export const numpadClearButton = document.getElementById('numpad-clear') as HTMLButtonElement;
+export const numpadButtons = document.querySelectorAll('.numpad-btn') as NodeListOf<HTMLButtonElement>;
+
 export const slidingElements = new Set<HTMLElement>();

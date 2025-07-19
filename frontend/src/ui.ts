@@ -3,6 +3,10 @@ import type { Message, ElementConfig, MessageStatus } from './types.ts';
 import {
   messageStorage, messageHistory, submitTransactionButton, transactionText, cloneTransactionButton,
   messageFavorites, transactionDialog, errorDialog, slidingElements,
+  amountDisplay,
+  modifyAmountButton,
+  numpadContainer,
+  submitWithAmountButton,
 } from './storage.js';
 import { toggleFavoriteStatus, deleteMessage } from './api.js';
 import { buildIconDom, faTrash, faCheck, faStar } from './icons.js';
@@ -267,7 +271,13 @@ export function showTransactionDialog(msgId: number): void {
   const isSubmitted = msgStatus === 'submitted';
   submitTransactionButton.classList.toggle('hidden', isSubmitted);
   cloneTransactionButton.classList.toggle('hidden', !isSubmitted);
+  modifyAmountButton.classList.toggle('hidden', false);
+  submitWithAmountButton.classList.toggle('hidden', true);
+  numpadContainer.classList.add('hidden');
   transactionDialog.classList.remove('hidden');
+
+  // 重置数字键盘显示
+  resetAmountDisplay();
 
   [messageHistory, messageFavorites].forEach((list: HTMLElement) => {
     list.scrollTop = list.scrollHeight;
@@ -277,6 +287,69 @@ export function showTransactionDialog(msgId: number): void {
 // 隐藏交易对话框
 export function hideTransactionDialog(): void {
   transactionDialog.classList.add('hidden');
+  numpadContainer.classList.add('hidden');
+  modifyAmountButton.classList.remove('hidden');
+  submitWithAmountButton.classList.add('hidden');
+}
+
+// 提取交易金额
+export function extractAmount(text: string): string | null {
+  // 匹配交易文本中的金额，假设金额是第一个数字
+  const match = text.match(/^\s*(\d+(\.\d+)?)\s/);
+  return match ? match[1] : null;
+}
+
+// 重置金额显示
+export function resetAmountDisplay(): void {
+  const msgId = transactionText.dataset.msgId;
+  if (!msgId) return;
+  
+  const message = messageStorage.get(Number(msgId));
+  if (!message) return;
+  
+  const amount = extractAmount(message.message);
+  amountDisplay.textContent = amount || '';
+  amountDisplay.dataset.originalAmount = amount || '';
+}
+
+// 显示数字键盘
+export function showNumpad(): void {
+  numpadContainer.classList.remove('hidden');
+  modifyAmountButton.classList.add('hidden');
+  submitWithAmountButton.classList.remove('hidden');
+  
+  // 确保金额显示已初始化
+  if (!amountDisplay.textContent) {
+    resetAmountDisplay();
+  }
+}
+
+// 隐藏数字键盘
+export function hideNumpad(): void {
+  numpadContainer.classList.add('hidden');
+  modifyAmountButton.classList.remove('hidden');
+  submitWithAmountButton.classList.add('hidden');
+}
+
+// 处理数字键盘输入
+export function handleNumpadInput(value: string): void {
+  // 如果是第一次点击，清空显示
+  if (amountDisplay.textContent === amountDisplay.dataset.originalAmount) {
+    amountDisplay.textContent = '';
+  }
+  
+  // 处理小数点
+  if (value === '.' && amountDisplay.textContent.includes('.')) {
+    return; // 已经有小数点了，忽略
+  }
+  
+  // 添加数字或小数点
+  amountDisplay.textContent += value;
+}
+
+// 清除金额显示
+export function clearAmountDisplay(): void {
+  amountDisplay.textContent = '';
 }
 
 // 切换收藏状态

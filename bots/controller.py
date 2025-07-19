@@ -78,9 +78,9 @@ def fetch_bill(start: date, end: date, root_level: int = 2) -> Table:
     return Table(title=title, headers=headers, rows=_translate_rows(rows))
 
 
-def clone_txs(message: str) -> Union[BaseMessage, ErrorMessage]:
+def clone_txs(message: str, amount=None) -> Union[BaseMessage, ErrorMessage]:
     try:
-        cloned_txs = bean_manager.clone_trx(message)
+        cloned_txs = bean_manager.clone_trx(message, amount)
     except ValueError as e:
         if e == NoTransactionError:
             err_msg = e.args[0]

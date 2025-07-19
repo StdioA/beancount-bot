@@ -8,7 +8,9 @@
             "history": "History",
             "favourites": "Favourites",
             "trx_hint": "Input your transaction",
-            "transaction_preview": "Transaction Preview"
+            "transaction_preview": "Transaction Preview",
+            "modify_amount": "Modify Amount",
+            "submit_modified": "Submit Modified"
         }
     },
     "zh_CN": {
@@ -20,7 +22,9 @@
             "history": "历史",
             "favourites": "收藏",
             "trx_hint": "输入您的交易",
-            "transaction_preview": "交易预览"
+            "transaction_preview": "交易预览",
+            "modify_amount": "修改金额",
+            "submit_modified": "提交修改"
         }
     },
     "fr_FR": {
@@ -32,7 +36,9 @@
             "history": "Historique",
             "favourites": "Favoris",
             "trx_hint": "Saisissez votre transaction",
-            "transaction_preview": "Aperçu de la transaction"
+            "transaction_preview": "Aperçu de la transaction",
+            "modify_amount": "Modifier le montant",
+            "submit_modified": "Soumettre modifié"
         }
     },
     "ko_KR": {
@@ -44,7 +50,9 @@
             "history": "이전",
             "favourites": "캐릭터",
             "trx_hint": "거래를 입력하세요",
-            "transaction_preview": "거래 미리보기"
+            "transaction_preview": "거래 미리보기",
+            "modify_amount": "금액 수정",
+            "submit_modified": "수정 제출"
         }
     },
     "de_DE": {
@@ -56,7 +64,9 @@
             "history": "Verlauf",
             "favourites": "Favoriten",
             "trx_hint": "Geben Sie Ihre Transaktion ein",
-            "transaction_preview": "Transaktionsvorschau"
+            "transaction_preview": "Transaktionsvorschau",
+            "modify_amount": "Betrag ändern",
+            "submit_modified": "Geändert absenden"
         }
     },
     "es_ES": {
@@ -68,7 +78,9 @@
             "history": "Historial",
             "favourites": "Favoritos",
             "trx_hint": "Ingrese su transacción",
-            "transaction_preview": "Vista previa de la transacción"
+            "transaction_preview": "Vista previa de la transacción",
+            "modify_amount": "Modificar cantidad",
+            "submit_modified": "Enviar modificado"
         }
     },
     "ja_JP": {
@@ -80,7 +92,9 @@
             "history": "履歴",
             "favourites": "お気に入り",
             "trx_hint": "トランザクションを入力してください",
-            "transaction_preview": "トランザクションプレビュー"
+            "transaction_preview": "トランザクションプレビュー",
+            "modify_amount": "金額を変更",
+            "submit_modified": "変更を送信"
         }
     },
     "ru_RU": {
@@ -92,7 +106,9 @@
             "history": "История",
             "favourites": "Избранное",
             "trx_hint": "Введите вашу транзакцию",
-            "transaction_preview": "Предварительный просмотр транзакции"
+            "transaction_preview": "Предварительный просмотр транзакции",
+            "modify_amount": "Изменить сумму",
+            "submit_modified": "Отправить изменения"
         }
     },
     "zh_TW": {
@@ -104,7 +120,9 @@
             "history": "歷史",
             "favourites": "最愛",
             "trx_hint": "輸入您的交易",
-            "transaction_preview": "交易預覽"
+            "transaction_preview": "交易預覽",
+            "modify_amount": "修改金額",
+            "submit_modified": "提交修改"
         }
     }
 }

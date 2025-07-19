@@ -1,11 +1,16 @@
 import './style.css';
 import './icons.js';
 import { initLocale } from './i18n.js';
-import { fetchMessages, sendChatMessage, submitTransaction, cloneTransaction } from './api.js';
-import { buildSubmittedElement, appendMessage, showErrorDialog, switchTab, markButtonSuccess, showTransactionDialog, hideTransactionDialog,  } from './ui.js';
+import { fetchMessages, sendChatMessage, submitTransaction, cloneTransaction, submitTransactionWithAmount as cloneTransactionWithAmount } from './api.js';
+import { 
+  buildSubmittedElement, appendMessage, showErrorDialog, switchTab, markButtonSuccess, 
+  showTransactionDialog, hideTransactionDialog, showNumpad, hideNumpad, 
+  handleNumpadInput, clearAmountDisplay, resetAmountDisplay
+} from './ui.js';
 import {
-  messageHistory, errorDialog, messageInput, sendButton, submitTransactionButton, transactionText, cloneTransactionButton, closeDialogButton,
-  messageFavorites, loadingIndicator, transactionDialog,
+  messageHistory, errorDialog, messageInput, sendButton, submitTransactionButton, transactionText, 
+  cloneTransactionButton, closeDialogButton, messageFavorites, loadingIndicator, transactionDialog,
+  modifyAmountButton, submitWithAmountButton, numpadContainer, amountDisplay, numpadClearButton, numpadButtons
 } from './storage.js';
 import { registerSW } from 'virtual:pwa-register';
 
@@ -51,13 +56,15 @@ async function handleSendMessage() {
 }
 
 // 处理交易操作
-async function handleTransactionAction(action: 'submit' | 'clone', msgId: string, button: HTMLButtonElement): Promise<void> {
+async function handleTransactionAction(action: 'submit' | 'clone' | 'clone_with_amount', msgId: string, button: HTMLButtonElement, amount?: string): Promise<void> {
   button.disabled = true;
   try {
     if (action === 'submit') {
       await submitTransaction(Number(msgId));
-    } else {
+    } else if (action === 'clone') {
       await cloneTransaction(Number(msgId));
+    } else if (action === 'clone_with_amount' && amount) {
+      await cloneTransactionWithAmount(Number(msgId), amount);
     }
     
     // 更新消息状态
@@ -98,6 +105,30 @@ function registerEventListeners(): void {
     const msgId = transactionText.dataset.msgId as string;
     await handleTransactionAction('clone', msgId, cloneTransactionButton);
   });
+  
+  // 修改金额按钮
+  modifyAmountButton.addEventListener('click', () => {
+    showNumpad();
+  });
+  
+  // 提交修改金额
+  submitWithAmountButton.addEventListener('click', async () => {
+    const msgId = transactionText.dataset.msgId as string;
+    const amount = amountDisplay.textContent;
+    if (amount) {
+      await handleTransactionAction('clone_with_amount', msgId, submitWithAmountButton, amount);
+    }
+  });
+  
+  // 数字键盘按钮
+  numpadButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      handleNumpadInput(button.textContent);
+    });
+  });
+  
+  // 清除按钮
+  numpadClearButton.addEventListener('click', clearAmountDisplay);
 
   // 对话框操作
   closeDialogButton.addEventListener('click', () => {

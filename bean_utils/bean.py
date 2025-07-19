@@ -288,7 +288,7 @@ class BeanManager:
                 # however it may not be happen if vecdb is built.
             raise e
 
-    def clone_trx(self, text) -> str:
+    def clone_trx(self, text, amount=None) -> str:
         """
         Clone a transaction from text.
 
@@ -304,6 +304,19 @@ class BeanManager:
         except StopIteration as e:
             raise NoTransactionError from e
 
+        if amount is not None:
+            for i, posting in enumerate(txs.postings):
+                if posting.units is not MISSING:
+                    txs.postings[i] = d.Posting(
+                        account=posting.account,
+                        units=d.Amount(Decimal(-amount), posting.units.currency),
+                        meta=posting.meta,
+                        cost=posting.cost,
+                        price=posting.price,
+                        flag=posting.flag,
+                    )
+                    break
+
         txs = d.Transaction(
             date=datetime.now().astimezone().date(),
             flag=txs.flag,
@@ -314,7 +327,7 @@ class BeanManager:
             tags=txs.tags,
             links=txs.links,
         )
-        return "\n" + self._printer(txs)
+        return self._printer(txs)
 
     def commit_trx(self, data):
         """
