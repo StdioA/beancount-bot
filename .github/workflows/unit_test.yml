@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - feature/unit_test
+      - fix/cc_action
     paths-ignore:
       - 'README.md'
       - 'README_zh.md'
@@ -35,9 +36,10 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-    - name: Upload results to Code Climate
-      uses: paambaati/codeclimate-action@v9.0.0
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+    - name: Export coverage data as LCOV
+      run: coverage lcov -o coverage.lcov
+    - name: Upload coverage data to Qlty Cloud
+      uses: qltysh/qlty-action/coverage@v1
       with:
-        coverageCommand: coverage xml
+        token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+        files: "coverage.lcov"
