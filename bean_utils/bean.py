@@ -360,7 +360,7 @@ class BeanManager:
             newline_count = 0
 
         # Calculate needed spacing: ensure exactly one blank line before, then one after
-        prefix = "\n" if newline_count == 0 else ""
+        prefix = "\n\n" if newline_count == 0 else "\n"
 
         with open(fname, 'a') as f:
             f.write(prefix + data.lstrip("\n") + "\n")
