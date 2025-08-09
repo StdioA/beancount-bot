@@ -19,7 +19,7 @@ const STYLES = {
     status === 'submitted' ? 'bg-green-200' : 'bg-gray-200'
   ],
   textDiv: ['justify-stretch', 'font-medium', 'text-gray-800'],
-  rightContainer: ['flex', 'items-center'],
+  rightContainer: ['flex', 'items-center', 'right-container'],
   collectIcon: (isFavorite: boolean) => [
     'justify-end', 'p-2', 'text-gray-400',
     isFavorite ? 'text-yellow-500' : 'hover:text-yellow-500',

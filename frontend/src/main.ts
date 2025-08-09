@@ -68,7 +68,7 @@ async function handleTransactionAction(action: 'submit' | 'clone' | 'clone_with_
     }
     
     // 更新消息状态
-    const messageElements = document.querySelectorAll<HTMLDivElement>(`[data-msg-id="${msgId}"]>div:last-child`);
+    const messageElements = document.querySelectorAll<HTMLDivElement>(`[data-msg-id="${msgId}"]>div.right-container`);
     messageElements.forEach((ele: HTMLDivElement) => {
       if (ele.querySelector('.ele-check') === null) {
         ele.insertBefore(buildSubmittedElement(), ele.firstChild);
