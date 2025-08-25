@@ -363,7 +363,7 @@ class BeanManager:
         prefix = "\n\n" if newline_count == 0 else "\n"
 
         with open(fname, 'a') as f:
-            f.write(prefix + data.lstrip("\n") + "\n")
+            f.write(prefix + data.strip("\n") + "\n")
         subprocess.run(["bean-format", "-o", shlex.quote(str(fname)), shlex.quote(str(fname))],   # noqa: S607,S603
                        shell=False)
 
