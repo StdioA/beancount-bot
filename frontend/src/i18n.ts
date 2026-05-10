@@ -13,7 +13,7 @@ export async function initLocale(): Promise<void> {
         resources: translation,
     });
     const localize = locI18next.init(i18next);
-    localize("#app");
+    localize("body");
 
     // Async refresh language
     try {
@@ -23,7 +23,7 @@ export async function initLocale(): Promise<void> {
         if (targetLanguage !== language) {
             localStorage.setItem('i18nextLng', language);
             i18next.changeLanguage(targetLanguage)
-            localize("#app");
+            localize("body");
         }
     } catch (error) {
         console.error('Error fetching language:', error);
