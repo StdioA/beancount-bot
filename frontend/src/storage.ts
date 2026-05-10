@@ -26,3 +26,5 @@ export const numpadClearButton = document.getElementById('numpad-clear') as HTML
 export const numpadButtons = document.querySelectorAll('.numpad-btn') as NodeListOf<HTMLButtonElement>;
 
 export const slidingElements = new Set<HTMLElement>();
+
+export const tabSlider = document.getElementById('tab-slider') as HTMLElement;

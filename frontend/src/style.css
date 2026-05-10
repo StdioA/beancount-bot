@@ -1,11 +1,27 @@
 @import "tailwindcss";
 
-/* 全局过渡效果 */
-* {
-  transition: all 0.2s ease-in-out;
+@theme {
+  --color-accent: #a78bfa;
+  --color-accent-glow: rgba(167, 139, 250, 0.4);
+  --color-glass-bg: rgba(255, 255, 255, 0.06);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
+  --color-glass-bg-heavy: rgba(255, 255, 255, 0.10);
 }
 
-/* 加载动画优化 */
+/* Dark gradient body */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: linear-gradient(to bottom, #0f172a, #09090b);
+    min-height: 100dvh;
+  }
+}
+
+/* Accent glow utility */
+.glow-accent {
+  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 60px rgba(167, 139, 250, 0.1);
+}
+
+/* Loading animation */
 .spinner {
   border: 3px solid rgba(0, 0, 0, 0.1);
   width: 40px;
@@ -15,12 +31,19 @@
   animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+@media (prefers-color-scheme: dark) {
+  .spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--color-accent);
+  }
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* 消息卡片悬浮效果 */
+/* Message card hover effect */
 .message-container {
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -30,7 +53,13 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* 按钮点击效果 */
+@media (prefers-color-scheme: dark) {
+  .message-container:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Button click effect */
 button {
   transition: transform 0.1s;
 }
@@ -39,12 +68,18 @@ button:active {
   transform: scale(0.98);
 }
 
-/* 输入框焦点效果 */
+/* Input focus effect */
 input:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-/* 添加触摸设备上的收藏按钮动画 */
+@media (prefers-color-scheme: dark) {
+  input:focus {
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+  }
+}
+
+/* Touch device favorite animation */
 @media (hover: none) {
   .ele-collect:active {
     animation: touchScale 0.4s ease-out;
@@ -57,7 +92,7 @@ input:focus {
   100% { transform: scale(1); }
 }
 
-/* 底部 Sheet */
+/* Bottom Sheet */
 #transaction-dialog {
   transform: translateY(100%);
   transition: none;
@@ -68,7 +103,7 @@ input:focus {
 }
 
 #transaction-dialog:not(.hidden) {
-  animation: sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: sheetSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes sheetSlideUp {
@@ -80,17 +115,33 @@ input:focus {
   }
 }
 
-/* 遮罩层淡入 */
+/* Sheet close animation */
+@keyframes sheetSlideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+#transaction-dialog.sheet-closing {
+  animation: sheetSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Overlay fade */
 #dialog-overlay {
   opacity: 0;
-  transition: none;
+  transition: opacity 0.3s ease;
 }
 
 #dialog-overlay:not(.hidden) {
   opacity: 1;
 }
 
-/* 顶部 Toast */
+/* Top Toast */
 #error-dialog {
   left: 50%;
   transition: none;
@@ -114,4 +165,60 @@ input:focus {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+
+/* Message slide-in animation */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: messageSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-card {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .skeleton-card {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 75%
+    );
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Tab slider transition */
+#tab-slider {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }

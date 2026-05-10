@@ -2,32 +2,45 @@ import './style.css';
 import './icons.js';
 import { initLocale } from './i18n.js';
 import { fetchMessages, sendChatMessage, submitTransaction, cloneTransaction, submitTransactionWithAmount as cloneTransactionWithAmount } from './api.js';
-import { 
-  buildSubmittedElement, appendMessage, showErrorDialog, switchTab, markButtonSuccess, 
-  showTransactionDialog, hideTransactionDialog, showNumpad, hideNumpad, 
-  handleNumpadInput, clearAmountDisplay, resetAmountDisplay
+import {
+  buildSubmittedElement, appendMessage, showErrorDialog, switchTab, markButtonSuccess,
+  showTransactionDialog, hideTransactionDialog, showNumpad,
+  handleNumpadInput, clearAmountDisplay, buildSkeletonCard
 } from './ui.js';
 import {
   messageHistory, errorDialog, messageInput, sendButton, submitTransactionButton, transactionText,
-  cloneTransactionButton, closeDialogButton, messageFavorites, loadingIndicator, transactionDialog,
-  dialogOverlay, modifyAmountButton, submitWithAmountButton, numpadContainer, amountDisplay, numpadClearButton, numpadButtons
+  cloneTransactionButton, closeDialogButton, messageFavorites,
+  dialogOverlay, modifyAmountButton, submitWithAmountButton, amountDisplay, numpadClearButton, numpadButtons
 } from './storage.js';
+import { triggerConfetti } from './confetti.js';
 import { registerSW } from 'virtual:pwa-register';
 
 
 // 初始化消息列表
 async function initMessages(): Promise<void> {
+  // 显示骨架卡片
+  const skeletonCount = 5;
+  const skeletonFragment = document.createDocumentFragment();
+  for (let i = 0; i < skeletonCount; i++) {
+    skeletonFragment.appendChild(buildSkeletonCard());
+  }
+  messageHistory.firstElementChild.appendChild(skeletonFragment);
+
   try {
     const { messages, favorites } = await fetchMessages();
+    // 移除骨架
+    messageHistory.firstElementChild.innerHTML = '';
+
     messages.forEach(async msg => {
-      await appendMessage(messageHistory, msg);
+      await appendMessage(messageHistory, msg, false);
     });
     favorites.forEach(async msg => {
-      await appendMessage(messageFavorites, msg);
+      await appendMessage(messageFavorites, msg, false);
     });
     messageHistory.scrollTop = messageHistory.scrollHeight;
   } catch (error) {
     console.error('Error fetching messages:', error);
+    messageHistory.firstElementChild.innerHTML = '';
     await showErrorDialog(errorDialog, 'Failed to fetch messages. Please check console for details.');
   }
 }
@@ -66,7 +79,7 @@ async function handleTransactionAction(action: 'submit' | 'clone' | 'clone_with_
     } else if (action === 'clone_with_amount' && amount) {
       await cloneTransactionWithAmount(Number(msgId), amount);
     }
-    
+
     // 更新消息状态
     const messageElements = document.querySelectorAll<HTMLDivElement>(`[data-msg-id="${msgId}"]>div.right-container`);
     messageElements.forEach((ele: HTMLDivElement) => {
@@ -74,8 +87,13 @@ async function handleTransactionAction(action: 'submit' | 'clone' | 'clone_with_
         ele.insertBefore(buildSubmittedElement(), ele.firstChild);
       }
     });
-    
+
     await markButtonSuccess(button);
+
+    // 提交成功 → confetti
+    const rect = button.getBoundingClientRect();
+    triggerConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
     hideTransactionDialog();
   } catch (error) {
     console.error(`Error during transaction ${action}:`, error);
@@ -87,7 +105,6 @@ async function handleTransactionAction(action: 'submit' | 'clone' | 'clone_with_
 
 // 注册事件监听器
 function registerEventListeners(): void {
-  // 发送消息
   sendButton.addEventListener('click', handleSendMessage);
   messageInput.addEventListener('keydown', async (event) => {
     if (event.key === 'Enter') {
@@ -95,23 +112,20 @@ function registerEventListeners(): void {
     }
   });
 
-  // 交易操作
   submitTransactionButton.addEventListener('click', async () => {
     const msgId = transactionText.dataset.msgId as string;
     await handleTransactionAction('submit', msgId, submitTransactionButton);
   });
-  
+
   cloneTransactionButton.addEventListener('click', async () => {
     const msgId = transactionText.dataset.msgId as string;
     await handleTransactionAction('clone', msgId, cloneTransactionButton);
   });
-  
-  // 修改金额按钮
+
   modifyAmountButton.addEventListener('click', () => {
     showNumpad();
   });
-  
-  // 提交修改金额
+
   submitWithAmountButton.addEventListener('click', async () => {
     const msgId = transactionText.dataset.msgId as string;
     const amount = amountDisplay.textContent;
@@ -119,33 +133,29 @@ function registerEventListeners(): void {
       await handleTransactionAction('clone_with_amount', msgId, submitWithAmountButton, amount);
     }
   });
-  
-  // 数字键盘按钮
+
   numpadButtons.forEach(button => {
     button.addEventListener('click', () => {
       handleNumpadInput(button.textContent);
     });
   });
-  
-  // 清除按钮
+
   numpadClearButton.addEventListener('click', clearAmountDisplay);
 
-  // 对话框操作
   closeDialogButton.addEventListener('click', () => {
     hideTransactionDialog();
   });
-  
+
   dialogOverlay.addEventListener('click', () => {
     hideTransactionDialog();
   });
-  
+
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       hideTransactionDialog();
     }
   });
 
-  // 标签页切换
   document.querySelectorAll<HTMLButtonElement>('[data-tab-button]').forEach(btn => {
     btn.addEventListener('click', () => {
       switchTab(btn.dataset.tabButton);
@@ -156,10 +166,7 @@ function registerEventListeners(): void {
 // 初始化应用
 document.addEventListener('DOMContentLoaded', async () => {
   registerEventListeners();
-  
-  loadingIndicator.classList.replace('hidden', 'flex');
   await Promise.all([initLocale(), initMessages()]);
-  loadingIndicator.classList.replace('flex', 'hidden');
 });
 
 // Service worker 配置
