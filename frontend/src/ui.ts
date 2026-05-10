@@ -147,6 +147,7 @@ function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
   const id = Number(messageDiv.dataset.msgId!);
   const button = createElement<HTMLDivElement>('div', {
     classes: STYLES.deleteButton,
+    attrs: { 'style': 'transform: translateX(calc(100% + 1px))' },
     events: { click: async (e) => {
       e.stopPropagation();
       try {
@@ -171,7 +172,7 @@ function createDeleteButton(messageDiv: HTMLElement): HTMLElement {
 function clearSlidingElements() {
   slidingElements.forEach(el => {
     el.style.transform = 'translateX(0)';
-    el.querySelector<HTMLElement>('.ele-delete').style.transform = 'translateX(100%)';
+    el.querySelector<HTMLElement>('.ele-delete').style.transform = 'translateX(calc(100% + 1px))';
   });
   slidingElements.clear();
 }
