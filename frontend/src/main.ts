@@ -8,9 +8,9 @@ import {
   handleNumpadInput, clearAmountDisplay, resetAmountDisplay
 } from './ui.js';
 import {
-  messageHistory, errorDialog, messageInput, sendButton, submitTransactionButton, transactionText, 
+  messageHistory, errorDialog, messageInput, sendButton, submitTransactionButton, transactionText,
   cloneTransactionButton, closeDialogButton, messageFavorites, loadingIndicator, transactionDialog,
-  modifyAmountButton, submitWithAmountButton, numpadContainer, amountDisplay, numpadClearButton, numpadButtons
+  dialogOverlay, modifyAmountButton, submitWithAmountButton, numpadContainer, amountDisplay, numpadClearButton, numpadButtons
 } from './storage.js';
 import { registerSW } from 'virtual:pwa-register';
 
@@ -135,10 +135,8 @@ function registerEventListeners(): void {
     hideTransactionDialog();
   });
   
-  document.addEventListener('click', (event: MouseEvent) => {
-    if (!transactionDialog.contains(event.target as Node | null) && !((event.target as HTMLElement)?.classList.contains('message'))) {
-      hideTransactionDialog();
-    }
+  dialogOverlay.addEventListener('click', () => {
+    hideTransactionDialog();
   });
   
   document.addEventListener('keydown', (event) => {

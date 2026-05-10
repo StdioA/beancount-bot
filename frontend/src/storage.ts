@@ -13,6 +13,7 @@ export const transactionText = document.getElementById('transaction-text') as HT
 export const submitTransactionButton = document.getElementById('submit-transaction') as HTMLButtonElement;
 export const cloneTransactionButton = document.getElementById('clone-transaction') as HTMLButtonElement;
 export const closeDialogButton = document.getElementById('close-dialog') as HTMLButtonElement;
+export const dialogOverlay = document.getElementById('dialog-overlay') as HTMLElement;
 export const errorDialog = document.getElementById('error-dialog') as HTMLElement;
 export const loadingIndicator = document.getElementById('loading-indicator') as HTMLElement;
 

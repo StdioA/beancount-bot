@@ -57,18 +57,61 @@ input:focus {
   100% { transform: scale(1); }
 }
 
-/* 对话框动画 */
-#transaction-dialog:not(.hidden) {
-  animation: slideIn 0.3s ease-out;
+/* 底部 Sheet */
+#transaction-dialog {
+  transform: translateY(100%);
+  transition: none;
 }
 
-@keyframes slideIn {
+#transaction-dialog.hidden {
+  transform: translateY(100%);
+}
+
+#transaction-dialog:not(.hidden) {
+  animation: sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 遮罩层淡入 */
+#dialog-overlay {
+  opacity: 0;
+  transition: none;
+}
+
+#dialog-overlay:not(.hidden) {
+  opacity: 1;
+}
+
+/* 顶部 Toast */
+#error-dialog {
+  left: 50%;
+  transition: none;
+}
+
+#error-dialog.hidden {
+  transform: translateX(-50%) translateY(-100%);
+  opacity: 0;
+}
+
+#error-dialog:not(.hidden) {
+  animation: toastSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes toastSlideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateX(-50%) translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
 }

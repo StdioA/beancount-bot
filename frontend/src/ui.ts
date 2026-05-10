@@ -2,7 +2,7 @@
 import type { Message, ElementConfig, MessageStatus } from './types.ts';
 import {
   messageStorage, messageHistory, submitTransactionButton, transactionText, cloneTransactionButton,
-  messageFavorites, transactionDialog, errorDialog, slidingElements,
+  messageFavorites, transactionDialog, dialogOverlay, errorDialog, slidingElements,
   amountDisplay,
   modifyAmountButton,
   numpadContainer,
@@ -221,7 +221,10 @@ export async function appendMessage(listElement: HTMLElement, msg: Message): Pro
 
 // 显示错误提示
 export async function showErrorDialog(errorDialog: HTMLElement, message: string): Promise<void> {
-  errorDialog.textContent = message;
+  const textSpan = errorDialog.querySelector('span');
+  if (textSpan) {
+    textSpan.textContent = message;
+  }
   errorDialog.classList.remove('hidden');
   await new Promise(resolve => setTimeout(resolve, 3000));
   errorDialog.classList.add('hidden');
@@ -274,6 +277,7 @@ export function showTransactionDialog(msgId: number): void {
   modifyAmountButton.classList.toggle('hidden', false);
   submitWithAmountButton.classList.toggle('hidden', true);
   numpadContainer.classList.add('hidden');
+  dialogOverlay.classList.remove('hidden');
   transactionDialog.classList.remove('hidden');
 
   // 重置数字键盘显示
@@ -286,6 +290,7 @@ export function showTransactionDialog(msgId: number): void {
 
 // 隐藏交易对话框
 export function hideTransactionDialog(): void {
+  dialogOverlay.classList.add('hidden');
   transactionDialog.classList.add('hidden');
   numpadContainer.classList.add('hidden');
   modifyAmountButton.classList.remove('hidden');
