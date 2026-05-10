@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import contextlib
 from pathlib import Path
 from datetime import datetime
@@ -45,15 +46,15 @@ class BeanManager:
         - `account_files`: a set of filenames.
         """
         self._entries, errors, self._options = loader.load_file(self.fname)
-        self._accounts = set()
+        self._accounts = OrderedDict()
         self.mtimes = {}
         self.account_files = set()
         for ent in self._entries:
             if isinstance(ent, d.Open):
-                self._accounts.add(ent.account)
+                self._accounts[ent.account] = ent.account
                 self.account_files.add(ent.meta["filename"])
             elif isinstance(ent, d.Close):
-                self._accounts.remove(ent.account)
+                del self._accounts[ent.account]
                 self.account_files.add(ent.meta["filename"])
 
         # Fill mtime
